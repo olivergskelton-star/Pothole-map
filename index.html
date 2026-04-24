@@ -35,7 +35,7 @@ html, body {
 var map = L.map('map').setView([52.0, -1.0], 13);
 
 L.tileLayer(
-  'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
   { attribution: '&copy; OpenStreetMap & Carto' }
 ).addTo(map);
 
@@ -101,12 +101,13 @@ fetch('segments.geojson')
         let icon = L.divIcon({
             className: "",
             html: `<div style="
-                width:0;height:0;
-                border-left:6px solid transparent;
-                border-right:6px solid transparent;
-                border-bottom:12px solid ${sqiColor(p.public_score)};
                 transform: rotate(${angle}deg);
-            "></div>`
+                font-size: 16px;
+                color: ${sqiColor(p.public_score)};
+                line-height: 16px;
+                text-shadow: 0 0 3px white;
+                font-weight: bold;
+            ">➤</div>`
         });
 
         L.marker([c[1], c[0]], { icon: icon })
