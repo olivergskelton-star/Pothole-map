@@ -1,0 +1,151 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Pot Hole Warrior Map</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+<style>
+html, body {
+    margin: 0;
+    height: 100%;
+}
+#map {
+    width: 100%;
+    height: 100%;
+}
+</style>
+</head>
+
+<body>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+
+// --------------------------------------------------
+// Map init
+// --------------------------------------------------
+var map = L.map('map').setView([52.0, -1.0], 13);
+
+L.tileLayer(
+  'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+  { attribution: '&copy; OpenStreetMap & Carto' }
+).addTo(map);
+
+
+// --------------------------------------------------
+// Helpers
+// --------------------------------------------------
+function sqiColor(score) {
+    if (score === null || score === undefined) return "#999";
+
+    if (score >= 85) return "#2ca25f";
+    if (score >= 70) return "#fee08b";
+    if (score >= 50) return "#fc8d59";
+    return "#d73027";
+}
+
+function defectColor(sev, min, max) {
+    let t = (sev - min) / (max - min);
+    t = Math.max(0, Math.min(1, t));
+
+    let r, g, b;
+
+    if (t < 0.5) {
+        let a = t / 0.5;
+        r = 254 + (252 - 254) * a;
+        g = 224 + (141 - 224) * a;
+        b = 139 + (89 - 139) * a;
+    } else {
+        let a = (t - 0.5) / 0.5;
+        r = 252 + (215 - 252) * a;
+        g = 141 + (48 - 141) * a;
+        b = 89 + (39 - 89) * a;
+    }
+
+    return "rgb(" + Math.round(r) + "," + Math.round(g) + "," + Math.round(b) + ")";
+}
+
+function defectOpacity(conf) {
+    return 0.25 + 0.65 * conf;
+}
+
+function defectRadius(sev, min, max) {
+    let t = (sev - min) / (max - min);
+    t = Math.max(0, Math.min(1, t));
+    return 4 + 10 * t;
+}
+
+
+// --------------------------------------------------
+// SEGMENTS (directional chevrons)
+// --------------------------------------------------
+fetch('segments.geojson')
+.then(r => r.json())
+.then(data => {
+
+    data.features.forEach(f => {
+
+        let p = f.properties;
+        let c = f.geometry.coordinates;
+
+        let angle = (p.bearing_deg || 0) - 90;
+
+        let icon = L.divIcon({
+            className: "",
+            html: `<div style="
+                width:0;height:0;
+                border-left:6px solid transparent;
+                border-right:6px solid transparent;
+                border-bottom:12px solid ${sqiColor(p.public_score)};
+                transform: rotate(${angle}deg);
+            "></div>`
+        });
+
+        L.marker([c[1], c[0]], { icon: icon })
+         .addTo(map);
+
+    });
+
+});
+
+
+// --------------------------------------------------
+// DEFECTS
+// --------------------------------------------------
+fetch('defects.geojson')
+.then(r => r.json())
+.then(data => {
+
+    let severities = data.features.map(f => f.properties.severity);
+    let min = Math.min(...severities);
+    let max = Math.max(...severities);
+
+    data.features.forEach(f => {
+
+        let p = f.properties;
+        let c = f.geometry.coordinates;
+
+        L.circleMarker([c[1], c[0]], {
+            radius: defectRadius(p.severity, min, max),
+            color: defectColor(p.severity, min, max),
+            fillColor: defectColor(p.severity, min, max),
+            fillOpacity: defectOpacity(p.confidence),
+            weight: 2
+        }).addTo(map);
+
+    });
+
+});
+
+</script>
+
+</body>
+</html>
