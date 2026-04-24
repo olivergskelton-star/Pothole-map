@@ -35,8 +35,11 @@ html, body {
 var map = L.map('map').setView([52.0, -1.0], 13);
 
 L.tileLayer(
-  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-  { attribution: '&copy; OpenStreetMap & Carto' }
+  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap contributors'
+  }
 ).addTo(map);
 
 
@@ -74,13 +77,13 @@ function defectColor(sev, min, max) {
 }
 
 function defectOpacity(conf) {
-    return 0.25 + 0.65 * conf;
+    return 0.12 + 0.55 * conf;
 }
 
 function defectRadius(sev, min, max) {
     let t = (sev - min) / (max - min);
     t = Math.max(0, Math.min(1, t));
-    return 4 + 10 * t;
+    return 2 + 6 * t;
 }
 
 
