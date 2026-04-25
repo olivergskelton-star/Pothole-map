@@ -26,7 +26,7 @@ html, body {
     z-index: 1000;
     background: rgba(20,20,20,0.86);
     color: white;
-    padding: 10px 16px;
+    padding: 12px 18px;
     border-radius: 14px;
     box-shadow: 0 3px 12px rgba(0,0,0,0.25);
     font-family: Arial, sans-serif;
@@ -38,11 +38,19 @@ html, body {
     align-items: center;
 }
 
-.logo-img {
-    width: 42px;
-    height: 42px;
-    object-fit: contain;
+.logo-badge {
+    width: 38px;
+    height: 38px;
     border-radius: 8px;
+    background: #e5e500;
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 15px;
+    letter-spacing: -1px;
+    border: 2px solid #000;
 }
 
 .title-main {
@@ -96,6 +104,10 @@ html, body {
     margin-top: 4px;
 }
 
+.leaflet-bottom.leaflet-left {
+    bottom: 180px;
+}
+
 .defect-dot {
     display: inline-block;
     width: 11px;
@@ -103,6 +115,21 @@ html, body {
     border-radius: 50%;
     margin-right: 7px;
     vertical-align: middle;
+}
+
+#locate-btn {
+    position: fixed;
+    right: 18px;
+    bottom: 22px;
+    z-index: 1000;
+    background: #111;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-weight: 700;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.25);
+    cursor: pointer;
 }
 
 .defect-dot.severe { background: #d73027; }
@@ -124,7 +151,7 @@ html, body {
 
 <div id="map-title">
   <div class="brand-row">
-    <img src="Assets/pot-hole-warrior-siteimageslogo.png" class="logo-img">
+    <div class="logo-badge">PW</div>
     <div>
       <div class="title-main">Pot Hole Warrior</div>
       <div class="title-sub">Road Surface Quality & Defect Signals</div>
@@ -138,6 +165,10 @@ html, body {
   <div class="legend-scale">
     <span>Very poor</span><span>Fair</span><span>Good</span>
   </div>
+
+  <button id="locate-btn">Centre on my location</button>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <div class="legend-title legend-gap">Defect Signals</div>
   <div><span class="defect-dot severe"></span> Higher severity</div>
@@ -153,7 +184,7 @@ html, body {
 // --------------------------------------------------
 // Map init
 // --------------------------------------------------
-var map = L.map('map').setView([52.0, -1.0], 13);
+var map = L.map('map').setView([52.254, -0.842], 13);
 
 L.tileLayer(
   'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -166,13 +197,13 @@ L.tileLayer(
 var segmentLayer = L.layerGroup().addTo(map);
 var defectLayer = L.layerGroup().addTo(map);
 
-L.control.layers(
+var layerControl = L.control.layers(
     null,
     {
         "Road Surface Quality": segmentLayer,
         "Defect Signals": defectLayer
     },
-    { collapsed: false }
+    { collapsed: false, position: "bottomleft" }
 ).addTo(map);
 
 
@@ -324,6 +355,37 @@ fetch('defects.geojson')
 
     });
 
+});
+
+document.getElementById("locate-btn").addEventListener("click", function () {
+    if (!navigator.geolocation) {
+        alert("Location is not supported by this browser.");
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        function (pos) {
+            let lat = pos.coords.latitude;
+            let lon = pos.coords.longitude;
+
+            L.circleMarker([lat, lon], {
+                radius: 7,
+                color: "#111",
+                fillColor: "#00a03c",
+                fillOpacity: 0.9,
+                weight: 2
+            }).addTo(map);
+
+            map.setView([lat, lon], 16);
+        },
+        function () {
+            alert("Could not get your location.");
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 10000
+        }
+    );
 });
 
 </script>
