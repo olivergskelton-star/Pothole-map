@@ -124,12 +124,11 @@ fetch('segments.geojson')
             className: "",
             html: `<div style="
                 transform: rotate(${angle}deg);
-                font-size: 16px;
-                color: ${sqiColor(p.public_score)};
-                line-height: 16px;
-                text-shadow: 0 0 3px white;
-                font-weight: bold;
-            ">➤</div>`
+                color:${sqiColor(score)};
+                font-size:18px;
+                line-height:18px;
+                font-weight:900;
+            ">➤</div>`,
         });
 
         L.marker([c[1], c[0]], { icon: icon })
