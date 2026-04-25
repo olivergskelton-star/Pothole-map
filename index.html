@@ -47,12 +47,31 @@ L.tileLayer(
 // Helpers
 // --------------------------------------------------
 function sqiColor(score) {
-    if (score === null || score === undefined) return "#999";
+    score = Number(score);
+    if (isNaN(score)) return "#999999";
 
-    if (score >= 85) return "#2ca25f";
-    if (score >= 70) return "#fee08b";
-    if (score >= 50) return "#fc8d59";
-    return "#d73027";
+    // SQI scale: 0 = bad/red, 50 = orange, 100 = good/green
+    let t = Math.max(0, Math.min(1, score / 100));
+
+    let r1, g1, b1, r2, g2, b2, a;
+
+    if (t < 0.5) {
+        // red -> orange
+        a = t / 0.5;
+        r1 = 215; g1 = 48;  b1 = 39;   // red
+        r2 = 252; g2 = 141; b2 = 89;   // orange
+    } else {
+        // orange -> green
+        a = (t - 0.5) / 0.5;
+        r1 = 252; g1 = 141; b1 = 89;   // orange
+        r2 = 44;  g2 = 162; b2 = 95;   // green
+    }
+
+    let r = Math.round(r1 + (r2 - r1) * a);
+    let g = Math.round(g1 + (g2 - g1) * a);
+    let b = Math.round(b1 + (b2 - b1) * a);
+
+    return `rgb(${r},${g},${b})`;
 }
 
 function defectColor(sev, min, max) {
