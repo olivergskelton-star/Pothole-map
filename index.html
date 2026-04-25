@@ -109,13 +109,12 @@ html, body {
     Left: 15px;
 }
 
-.defect-dot {
-    display: inline-block;
-    width: 11px;
-    height: 11px;
-    border-radius: 50%;
-    margin-right: 7px;
-    vertical-align: middle;
+.defect-gradient-bar {
+    height: 12px;
+    width: 200px;
+    border-radius: 8px;
+    background: linear-gradient(90deg, #ff8c00, #c80000);
+    border: 1px solid rgba(0,0,0,0.25);
 }
 
 #locate-btn {
@@ -138,9 +137,6 @@ html, body {
     transform: rotate(-45deg);
 }
 
-.defect-dot.severe { background: #d73027; }
-.defect-dot.moderate { background: #fc8d59; }
-.defect-dot.low { background: #fee08b; }
 
 .legend-note {
     margin-top: 7px;
@@ -173,11 +169,14 @@ html, body {
   </div>
 
   <div class="legend-title legend-gap">Defect Signals</div>
-  <div><span class="defect-dot severe"></span> Higher severity</div>
-  <div><span class="defect-dot moderate"></span> Medium severity</div>
-  <div><span class="defect-dot low"></span> Lower severity</div>
-  <div class="legend-note">Size = Severity<br>Oapacity = Confidence</div>
-</div>
+  <div class="defect-gradient-bar"></div>
+  <div class="legend-scale">
+      <span>Moderate</span>
+      <span>Severe</span>
+  </div>
+  <div class="legend-note">
+      More solid = higher confidence
+  </div>
 
 <button id="locate-btn" title="Centre on my location">➤</button>
 
@@ -268,9 +267,7 @@ function defectOpacity(conf) {
 }
 
 function defectRadius(sev, min, max) {
-    let t = (sev - min) / (max - min);
-    t = Math.max(0, Math.min(1, t));
-    return 2 + 6 * t;
+    return 5;
 }
 
 
