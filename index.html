@@ -18,12 +18,139 @@ html, body {
     width: 100%;
     height: 100%;
 }
+#map-title {
+    position: fixed;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    background: rgba(20,20,20,0.86);
+    color: white;
+    padding: 10px 16px;
+    border-radius: 14px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.25);
+    font-family: Arial, sans-serif;
+}
+
+.brand-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.logo-dot {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #d73027;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 12px;
+}
+
+.title-main {
+    font-weight: 800;
+    font-size: 16px;
+    line-height: 18px;
+}
+
+.title-sub {
+    font-size: 12px;
+    opacity: 0.82;
+}
+
+#legend {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 1000;
+    background: rgba(255,255,255,0.94);
+    padding: 12px 14px;
+    border-radius: 12px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.22);
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    line-height: 1.35;
+    max-width: 230px;
+}
+
+.legend-title {
+    font-weight: 800;
+    margin-bottom: 6px;
+}
+
+.legend-gap {
+    margin-top: 12px;
+}
+
+.gradient-bar {
+    height: 12px;
+    width: 200px;
+    border-radius: 8px;
+    background: linear-gradient(90deg, #c80000, #ff8c00, #00a03c);
+    border: 1px solid rgba(0,0,0,0.25);
+}
+
+.legend-scale {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #444;
+    margin-top: 4px;
+}
+
+.defect-dot {
+    display: inline-block;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    margin-right: 7px;
+    vertical-align: middle;
+}
+
+.defect-dot.severe { background: #d73027; }
+.defect-dot.moderate { background: #fc8d59; }
+.defect-dot.low { background: #fee08b; }
+
+.legend-note {
+    margin-top: 7px;
+    color: #555;
+    font-size: 11px;
+}
+
 </style>
 </head>
 
 <body>
 
 <div id="map"></div>
+
+<div id="map-title">
+  <div class="brand-row">
+    <div class="logo-dot">PW</div>
+    <div>
+      <div class="title-main">Pot Hole Warrior</div>
+      <div class="title-sub">Road Surface Quality & Defect Signals</div>
+    </div>
+  </div>
+</div>
+
+<div id="legend">
+  <div class="legend-title">Road Surface Quality</div>
+  <div class="gradient-bar"></div>
+  <div class="legend-scale">
+    <span>Very poor</span><span>Fair</span><span>Good</span>
+  </div>
+
+  <div class="legend-title legend-gap">Defect Signals</div>
+  <div><span class="defect-dot severe"></span> Higher severity</div>
+  <div><span class="defect-dot moderate"></span> Medium severity</div>
+  <div><span class="defect-dot low"></span> Lower severity</div>
+  <div class="legend-note">Bigger = more severe<br>More solid = higher confidence</div>
+</div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -40,6 +167,18 @@ L.tileLayer(
     maxZoom: 19,
     attribution: '&copy; OpenStreetMap contributors'
   }
+).addTo(map);
+
+var segmentLayer = L.layerGroup().addTo(map);
+var defectLayer = L.layerGroup().addTo(map);
+
+L.control.layers(
+    null,
+    {
+        "Road Surface Quality": segmentLayer,
+        "Defect Signals": defectLayer
+    },
+    { collapsed: false }
 ).addTo(map);
 
 
@@ -131,7 +270,7 @@ fetch('segments.geojson')
             ">➤</div>`,
         });
 
-        let marker = L.marker([c[1], c[0]], { icon: icon }).addTo(map);
+        let marker = L.marker([c[1], c[0]], { icon: icon }).addTo(segmentLayer);
 
         function updateSegmentMarkerStyle() {
             let z = map.getZoom();
@@ -187,7 +326,7 @@ fetch('defects.geojson')
             fillColor: defectColor(p.severity, min, max),
             fillOpacity: defectOpacity(p.confidence),
             weight: 2
-        }).addTo(map);
+        }).addTo(defectLayer);
 
     });
 
