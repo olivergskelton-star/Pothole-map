@@ -131,8 +131,34 @@ fetch('segments.geojson')
             ">➤</div>`,
         });
 
-        L.marker([c[1], c[0]], { icon: icon })
-         .addTo(map);
+        let marker = L.marker([c[1], c[0]], { icon: icon }).addTo(map);
+
+        function updateSegmentMarkerStyle() {
+            let z = map.getZoom();
+
+            // opacity fades in between zoom 11 → 15
+            let opacity = Math.max(0, Math.min(1, (z - 11) / 4));
+
+            // size grows slightly as you zoom in
+            let size = Math.max(10, Math.min(18, 10 + (z - 11) * 2));
+
+            let el = marker.getElement();
+
+            if (el) {
+                el.style.opacity = opacity;
+
+                let iconDiv = el.querySelector("div");
+                if (iconDiv) {
+                    iconDiv.style.fontSize = size + "px";
+                    iconDiv.style.lineHeight = size + "px";
+                }
+            }
+        }
+
+        map.on("zoomend", updateSegmentMarkerStyle);
+        map.on("zoom", updateSegmentMarkerStyle);
+
+        setTimeout(updateSegmentMarkerStyle, 500);
 
     });
 
