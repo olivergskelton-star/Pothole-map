@@ -105,7 +105,7 @@ html, body {
 }
 
 .leaflet-bottom.leaflet-left {
-    bottom: 180px;
+    bottom: 245px;
 }
 
 .defect-dot {
@@ -122,14 +122,19 @@ html, body {
     right: 18px;
     bottom: 22px;
     z-index: 1000;
+    width: 44px;
+    height: 44px;
     background: #111;
     color: white;
     border: none;
-    border-radius: 10px;
-    padding: 10px 14px;
-    font-weight: 700;
-    box-shadow: 0 3px 12px rgba(0,0,0,0.25);
+    border-radius: 50%;
+    font-size: 22px;
+    font-weight: 900;
+    line-height: 44px;
+    text-align: center;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.30);
     cursor: pointer;
+    transform: rotate(-45deg);
 }
 
 .defect-dot.severe { background: #d73027; }
@@ -173,7 +178,7 @@ html, body {
   <div class="legend-note">Bigger = more severe<br>More solid = higher confidence</div>
 </div>
 
-<button id="locate-btn">Centre on my location</button>
+<button id="locate-btn" title="Centre on my location">➤</button>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
