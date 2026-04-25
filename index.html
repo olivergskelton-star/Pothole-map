@@ -58,13 +58,13 @@ function sqiColor(score) {
     if (t < 0.5) {
         // red -> orange
         a = t / 0.5;
-        r1 = 215; g1 = 48;  b1 = 39;   // red
-        r2 = 252; g2 = 141; b2 = 89;   // orange
+        r1 = 200; g1 = 0;   b1 = 0;     // stronger red
+        r2 = 255; g2 = 140; b2 = 0;     // stronger orange
     } else {
         // orange -> green
         a = (t - 0.5) / 0.5;
-        r1 = 252; g1 = 141; b1 = 89;   // orange
-        r2 = 44;  g2 = 162; b2 = 95;   // green
+        r1 = 255; g1 = 140; b1 = 0;     // orange
+        r2 = 0;   g2 = 160; b2 = 60;    // stronger green
     }
 
     let r = Math.round(r1 + (r2 - r1) * a);
