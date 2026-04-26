@@ -173,6 +173,37 @@ html, body {
     margin-top: 10px;
 }
 
+#layer-panel {
+    position: fixed;
+    left: 18px;
+    top: 82px;
+    z-index: 1000;
+    background: rgba(255,255,255,0.94);
+    padding: 10px 12px;
+    border-radius: 12px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.22);
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    min-width: 180px;
+}
+
+.layer-title {
+    font-weight: 900;
+    margin-bottom: 7px;
+}
+
+.layer-row {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin: 6px 0;
+    cursor: pointer;
+}
+
+.layer-row input {
+    transform: scale(1.05);
+}
+
 @media (max-width: 768px) {
     #legend {
         max-width: 250px;
@@ -205,6 +236,20 @@ html, body {
       <div class="title-sub">Road Surface Quality & Defect Signals</div>
     </div>
   </div>
+</div>
+
+<div id="layer-panel">
+  <div class="layer-title">Layers</div>
+
+  <label class="layer-row">
+    <input type="checkbox" id="toggle-sqi" checked>
+    <span>Road Surface Quality</span>
+  </label>
+
+  <label class="layer-row">
+    <input type="checkbox" id="toggle-defects" checked>
+    <span>Defect Signals</span>
+  </label>
 </div>
 
 <div id="legend">
@@ -279,14 +324,7 @@ L.tileLayer(
 var segmentLayer = L.layerGroup().addTo(map);
 var defectLayer = L.layerGroup().addTo(map);
 
-var layerControl = L.control.layers(
-    null,
-    {
-        "Road Surface Quality": segmentLayer,
-        "Defect Signals": defectLayer
-    },
-    { collapsed: false, position: "topleft" }
-).addTo(map);
+
 
 
 // --------------------------------------------------
@@ -401,6 +439,22 @@ fetch('defects.geojson')
 
     });
 
+});
+
+document.getElementById("toggle-sqi").addEventListener("change", function () {
+    if (this.checked) {
+        segmentLayer.addTo(map);
+    } else {
+        map.removeLayer(segmentLayer);
+    }
+});
+
+document.getElementById("toggle-defects").addEventListener("change", function () {
+    if (this.checked) {
+        defectLayer.addTo(map);
+    } else {
+        map.removeLayer(defectLayer);
+    }
 });
 
 document.getElementById("locate-btn").addEventListener("click", function () {
