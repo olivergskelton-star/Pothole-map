@@ -177,6 +177,7 @@ html, body {
   <div class="legend-note">
       More solid = higher confidence
   </div>
+  </div>
 
 <button id="locate-btn" title="Centre on my location">➤</button>
 
@@ -291,9 +292,6 @@ fetch('segments.geojson')
             weight: 0,
             stroke: false
         }).addTo(segmentLayer);
-
-        let marker = L.marker([c[1], c[0]], { icon: icon }).addTo(segmentLayer);
-
     });
 
 });
