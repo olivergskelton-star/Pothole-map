@@ -283,47 +283,16 @@ fetch('segments.geojson')
         let p = f.properties;
         let c = f.geometry.coordinates;
 
-        let angle = (p.bearing_deg || 0) - 90;
-
-        let icon = L.divIcon({
-            className: "",
-            html: `<div style="
-                transform: rotate(${angle}deg);
-                color:${sqiColor(p.public_score)};
-                font-size:18px;
-                line-height:18px;
-                font-weight:900;
-            ">➤</div>`,
-        });
+        let marker = L.circleMarker([c[1], c[0]], {
+            radius: 4,
+            color: sqiColor(p.public_score),
+            fillColor: sqiColor(p.public_score),
+            fillOpacity: 0.85,
+            weight: 0,
+            stroke: false
+        }).addTo(segmentLayer);
 
         let marker = L.marker([c[1], c[0]], { icon: icon }).addTo(segmentLayer);
-
-        function updateSegmentMarkerStyle() {
-            let z = map.getZoom();
-
-            // opacity fades in between zoom 11 → 15
-            let opacity = Math.max(0, Math.min(1, (z - 11) / 4));
-
-            // size grows slightly as you zoom in
-            let size = Math.max(10, Math.min(18, 10 + (z - 11) * 2));
-
-            let el = marker.getElement();
-
-            if (el) {
-                el.style.opacity = opacity;
-
-                let iconDiv = el.querySelector("div");
-                if (iconDiv) {
-                    iconDiv.style.fontSize = size + "px";
-                    iconDiv.style.lineHeight = size + "px";
-                }
-            }
-        }
-
-        map.on("zoomend", updateSegmentMarkerStyle);
-        map.on("zoom", updateSegmentMarkerStyle);
-
-        setTimeout(updateSegmentMarkerStyle, 500);
 
     });
 
@@ -351,7 +320,7 @@ fetch('defects.geojson')
             color: defectColor(p.severity, min, max),
             fillColor: defectColor(p.severity, min, max),
             fillOpacity: defectOpacity(p.confidence),
-            weight: 2
+            weight: 0.5
         }).addTo(defectLayer);
 
     });
