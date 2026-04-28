@@ -216,7 +216,37 @@ html, body {
     margin-top: 10px;
 }
 
+.sm-watermark {
+  position: fixed;
+  left: 18px;
+  bottom: 42px;
+  z-index: 1000;
 
+  background: rgba(20, 20, 20, 0.82);
+  color: #ffffff;
+
+  padding: 10px 14px;
+  border-radius: 10px;
+
+  font-family: Arial, sans-serif;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(4px);
+
+  max-width: 300px;
+}
+
+.sm-watermark-title {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.sm-watermark-subtitle {
+  margin-top: 3px;
+  font-size: 12px;
+  color: #c7c7c7;
+  font-weight: 600;
+}
 
 @media (max-width: 768px) {
     #map-panel {
@@ -237,6 +267,15 @@ html, body {
 <body>
 
 <div id="map"></div>
+
+<div class="sm-watermark">
+  <div class="sm-watermark-title">
+    Proprietary Road Deterioration Modelling Software
+  </div>
+  <div class="sm-watermark-subtitle">
+    Powered by Surface Monitor
+  </div>
+</div>
 
 <div id="map-title">
   <div class="brand-row">
@@ -294,16 +333,7 @@ html, body {
 </div>
 
 
-  <div id="info-content" class="panel-content">
-    <div><b>Road Surface Quality</b><br>
-      100m road sections scored from phone sensor data. Lower scores indicate rougher or less comfortable surface conditions. This is a general surface-quality layer, not a specific pothole detector.
-    </div>
 
-    <div class="info-gap"><b>Defect Signals</b><br>
-      Localised impact clusters detected from repeated burst evidence. Redder signals indicate stronger impacts. More solid signals indicate higher confidence from repeat observations, recency, and supporting drive evidence.
-    </div>
-  </div>
-</div>
 
 <button id="locate-btn" title="Centre on my location">➤</button>
 
