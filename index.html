@@ -1,540 +1,541 @@
 
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8" />
-<title>Pot Hole Warrior Map</title>
+  <!DOCTYPE html>
+  <html>
+  <head>
+  <meta charset="utf-8" />
+  <title>Pot Hole Warrior Map</title>
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
-<style>
-html, body {
-    margin: 0;
-    height: 100%;
-}
-#map {
-    width: 100%;
-    height: 100%;
-}
-#map-title {
-    position: fixed;
-    top: 8px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1000;
-    background: rgba(20,20,20,0.82);
-    color: white;
-    padding: 6px 10px;
-    border-radius: 12px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-    font-family: Arial, sans-serif;
-    max-width: 240px;
-}
+  <style>
+  html, body {
+      margin: 0;
+      height: 100%;
+  }
+  #map {
+      width: 100%;
+      height: 100%;
+  }
+  #map-title {
+      position: fixed;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      background: rgba(20,20,20,0.82);
+      color: white;
+      padding: 6px 10px;
+      border-radius: 12px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+      font-family: Arial, sans-serif;
+      max-width: 240px;
+  }
 
-.brand-row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
+  .brand-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+  }
 
-.logo-badge {
-    width: 30px;
-    height: 30px;
-    border-radius: 8px;
-    background: #e5e500;
-    color: #000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 900;
-    font-size: 13px;
-    border: 2px solid #000;
-}
+  .logo-badge {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: #e5e500;
+      color: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 13px;
+      border: 2px solid #000;
+  }
 
-.title-main {
-    font-weight: 800;
-    font-size: 14px;
-    line-height: 15px;
-}
+  .title-main {
+      font-weight: 800;
+      font-size: 14px;
+      line-height: 15px;
+  }
 
-.title-sub {
-    font-size: 11px;
-    opacity: 0.8;
-}
-
-
-
-.legend-title {
-    font-weight: 800;
-    margin-bottom: 6px;
-}
-
-.legend-gap {
-    margin-top: 12px;
-}
-
-.gradient-bar {
-    height: 12px;
-    width: 200px;
-    border-radius: 8px;
-    background: linear-gradient(90deg, #c80000, #ff8c00, #00a03c);
-    border: 1px solid rgba(0,0,0,0.25);
-}
-
-.legend-scale {
-    display: flex;
-    justify-content: space-between;
-    font-size: 11px;
-    color: #444;
-    margin-top: 4px;
-}
-
-.leaflet-bottom.leaflet-left {
-    bottom: 245px;
-    Left: 15px;
-}
-
-.defect-gradient-bar {
-    height: 12px;
-    width: 200px;
-    border-radius: 8px;
-    background: linear-gradient(90deg, #ff8c00, #c80000);
-    border: 1px solid rgba(0,0,0,0.25);
-}
-
-#locate-btn {
-    position: fixed;
-    right: 18px;
-    bottom: 22px;
-    z-index: 1000;
-    width: 44px;
-    height: 44px;
-    background: #111;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    font-size: 22px;
-    font-weight: 900;
-    line-height: 44px;
-    text-align: center;
-    box-shadow: 0 3px 12px rgba(0,0,0,0.30);
-    cursor: pointer;
-    transform: rotate(-45deg);
-}
-
-
-.legend-note {
-    margin-top: 7px;
-    color: #555;
-    font-size: 11px;
-}
-
-.panel-toggle {
-    cursor: pointer;
-    font-weight: 800;
-    user-select: none;
-}
-
-.panel-content {
-    margin-top: 8px;
-}
+  .title-sub {
+      font-size: 11px;
+      opacity: 0.8;
+  }
 
 
 
-.info-gap {
-    margin-top: 10px;
-}
+  .legend-title {
+      font-weight: 800;
+      margin-bottom: 6px;
+  }
+
+  .legend-gap {
+      margin-top: 12px;
+  }
+
+  .gradient-bar {
+      height: 12px;
+      width: 200px;
+      border-radius: 8px;
+      background: linear-gradient(90deg, #c80000, #ff8c00, #00a03c);
+      border: 1px solid rgba(0,0,0,0.25);
+  }
+
+  .legend-scale {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #444;
+      margin-top: 4px;
+  }
+
+  .leaflet-bottom.leaflet-left {
+      bottom: 245px;
+      Left: 15px;
+  }
+
+  .defect-gradient-bar {
+      height: 12px;
+      width: 200px;
+      border-radius: 8px;
+      background: linear-gradient(90deg, #ff8c00, #c80000);
+      border: 1px solid rgba(0,0,0,0.25);
+  }
+
+  #locate-btn {
+      position: fixed;
+      right: 18px;
+      bottom: 22px;
+      z-index: 1000;
+      width: 44px;
+      height: 44px;
+      background: #111;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      font-size: 22px;
+      font-weight: 900;
+      line-height: 44px;
+      text-align: center;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.30);
+      cursor: pointer;
+      transform: rotate(-45deg);
+  }
+
+
+  .legend-note {
+      margin-top: 7px;
+      color: #555;
+      font-size: 11px;
+  }
+
+  .panel-toggle {
+      cursor: pointer;
+      font-weight: 800;
+      user-select: none;
+  }
+
+  .panel-content {
+      margin-top: 8px;
+  }
 
 
 
-.layer-title {
-    font-weight: 900;
-    margin-bottom: 7px;
-}
+  .info-gap {
+      margin-top: 10px;
+  }
 
-.layer-row {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    margin: 6px 0;
-    cursor: pointer;
-}
 
-.layer-row input {
-    transform: scale(1.05);
-}
 
-#map-panel {
+  .layer-title {
+      font-weight: 900;
+      margin-bottom: 7px;
+  }
+
+  .layer-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin: 6px 0;
+      cursor: pointer;
+  }
+
+  .layer-row input {
+      transform: scale(1.05);
+  }
+
+  #map-panel {
+      position: fixed;
+      left: 18px;
+      top: 82px;
+      z-index: 1000;
+      background: rgba(255,255,255,0.94);
+      padding: 12px 14px;
+      border-radius: 12px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.22);
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      line-height: 1.35;
+      max-width: 270px;
+  }
+
+  .panel-toggle {
+      cursor: pointer;
+      font-weight: 800;
+      user-select: none;
+  }
+
+  .panel-content {
+      margin-top: 10px;
+  }
+
+  .panel-section-title {
+      font-weight: 900;
+      margin-bottom: 7px;
+  }
+
+  .panel-gap {
+      margin-top: 14px;
+  }
+
+  .layer-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin: 6px 0;
+      cursor: pointer;
+  }
+
+  .layer-row input {
+      transform: scale(1.05);
+  }
+
+  .info-gap {
+      margin-top: 10px;
+  }
+
+  .sm-watermark {
     position: fixed;
     left: 18px;
-    top: 82px;
+    bottom: 42px;
     z-index: 1000;
-    background: rgba(255,255,255,0.94);
-    padding: 12px 14px;
-    border-radius: 12px;
-    box-shadow: 0 3px 12px rgba(0,0,0,0.22);
+
+    background: rgba(20, 20, 20, 0.82);
+    color: #ffffff;
+
+    padding: 10px 14px;
+    border-radius: 10px;
+
     font-family: Arial, sans-serif;
-    font-size: 12px;
-    line-height: 1.35;
-    max-width: 270px;
-}
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(4px);
 
-.panel-toggle {
-    cursor: pointer;
-    font-weight: 800;
-    user-select: none;
-}
-
-.panel-content {
-    margin-top: 10px;
-}
-
-.panel-section-title {
-    font-weight: 900;
-    margin-bottom: 7px;
-}
-
-.panel-gap {
-    margin-top: 14px;
-}
-
-.layer-row {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    margin: 6px 0;
-    cursor: pointer;
-}
-
-.layer-row input {
-    transform: scale(1.05);
-}
-
-.info-gap {
-    margin-top: 10px;
-}
-
-.sm-watermark {
-  position: fixed;
-  left: 18px;
-  bottom: 42px;
-  z-index: 1000;
-
-  background: rgba(20, 20, 20, 0.82);
-  color: #ffffff;
-
-  padding: 10px 14px;
-  border-radius: 10px;
-
-  font-family: Arial, sans-serif;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
-  backdrop-filter: blur(4px);
-
-  max-width: 300px;
-}
-
-.sm-watermark-title {
-  font-size: 13px;
-  font-weight: 700;
-  line-height: 1.25;
-}
-
-.sm-watermark-subtitle {
-  margin-top: 3px;
-  font-size: 12px;
-  color: #c7c7c7;
-  font-weight: 600;
-}
-
-@media (max-width: 768px) {
-    #map-panel {
-        left: 14px;
-        right: 14px;
-        top: 78px;
-        max-width: none;
-    }
-
-    .panel-content {
-        display: none;
-    }
-}
-
-</style>
-</head>
-
-<body>
-
-<div id="map"></div>
-
-<div class="sm-watermark">
-  <div class="sm-watermark-title">
-    Proprietary Road Deterioration Modelling Software
-  </div>
-  <div class="sm-watermark-subtitle">
-    Powered by Surface Monitor
-  </div>
-</div>
-
-<div id="map-title">
-  <div class="brand-row">
-    <div class="logo-badge">PW</div>
-    <div>
-      <div class="title-main">Pot Hole Warrior</div>
-      <div class="title-sub">Road Surface Quality & Defect Signals</div>
-    </div>
-  </div>
-</div>
-
-<div id="map-panel">
-  <div class="panel-toggle" onclick="togglePanel('map-panel-content', 'map-panel-arrow')">
-    <b>Map controls</b> <span id="map-panel-arrow">▼</span>
-  </div>
-
-  <div id="map-panel-content" class="panel-content">
-    <div class="panel-section-title">Layers</div>
-
-    <label class="layer-row">
-      <input type="checkbox" id="toggle-sqi" checked>
-      <span>Road Surface Quality</span>
-    </label>
-
-    <label class="layer-row">
-      <input type="checkbox" id="toggle-defects" checked>
-      <span>Defect Signals</span>
-    </label>
-
-    <div class="panel-section-title panel-gap">Legend</div>
-
-    <div class="legend-title">Road Surface Quality</div>
-    <div class="gradient-bar"></div>
-    <div class="legend-scale">
-      <span>Very poor</span><span>Fair</span><span>Good</span>
-    </div>
-
-    <div class="legend-title legend-gap">Defect Signals</div>
-    <div class="defect-gradient-bar"></div>
-    <div class="legend-scale">
-      <span>Moderate</span><span>Severe</span>
-    </div>
-    <div class="legend-note">More solid = higher confidence</div>
-
-    <div class="panel-section-title panel-gap">What am I looking at?</div>
-
-    <div><b>Road Surface Quality</b><br>
-      100m road sections scored from phone sensor data. Lower scores indicate rougher surface conditions.
-    </div>
-
-    <div class="info-gap"><b>Defect Signals</b><br>
-      Localised impact clusters. Redder signals indicate stronger impacts. More solid signals indicate higher confidence.
-    </div>
-  </div>
-</div>
-
-
-
-
-<button id="locate-btn" title="Centre on my location">➤</button>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<script>
-
-function togglePanel(contentId, arrowId) {
-    const content = document.getElementById(contentId);
-    const arrow = document.getElementById(arrowId);
-
-    if (!content || !arrow) return;
-
-    const hidden = content.style.display === "none";
-
-    content.style.display = hidden ? "block" : "none";
-    arrow.textContent = hidden ? "▲" : "▼";
-}
-
-
-// --------------------------------------------------
-// Map init
-// --------------------------------------------------
-var map = L.map('map', { preferCanvas: true }).setView([52.254, -0.842], 13);
-
-L.tileLayer(
-  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-  {
-    maxZoom: 19,
-    attribution: '&copy; OpenStreetMap contributors'
+    max-width: 300px;
   }
-).addTo(map);
 
-var segmentLayer = L.layerGroup().addTo(map);
-var defectLayer = L.layerGroup().addTo(map);
+  .sm-watermark-title {
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  .sm-watermark-subtitle {
+    margin-top: 3px;
+    font-size: 12px;
+    color: #c7c7c7;
+    font-weight: 600;
+  }
+
+  @media (max-width: 768px) {
+      #map-panel {
+          left: 14px;
+          right: 14px;
+          top: 78px;
+          max-width: none;
+      }
+
+      .panel-content {
+          display: none;
+      }
+  }
+
+  </style>
+  </head>
+
+  <body>
+
+  <div id="map"></div>
+
+  <div class="sm-watermark">
+    <div class="sm-watermark-title">
+      Proprietary Road Deterioration Modelling Software
+    </div>
+    <div class="sm-watermark-subtitle">
+      Powered by Surface Monitor
+    </div>
+  </div>
+
+  <div id="map-title">
+    <div class="brand-row">
+      <div class="logo-badge">PW</div>
+      <div>
+        <div class="title-main">Pot Hole Warrior</div>
+        <div class="title-sub">Road Surface Quality & Defect Signals</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="map-panel">
+    <div class="panel-toggle" onclick="togglePanel('map-panel-content', 'map-panel-arrow')">
+      <b>Map controls</b> <span id="map-panel-arrow">▼</span>
+    </div>
+
+    <div id="map-panel-content" class="panel-content">
+      <div class="panel-section-title">Layers</div>
+
+      <label class="layer-row">
+        <input type="checkbox" id="toggle-sqi" checked>
+        <span>Road Surface Quality</span>
+      </label>
+
+      <label class="layer-row">
+        <input type="checkbox" id="toggle-defects" checked>
+        <span>Defect Signals</span>
+      </label>
+
+      <div class="panel-section-title panel-gap">Legend</div>
+
+      <div class="legend-title">Road Surface Quality</div>
+      <div class="gradient-bar"></div>
+      <div class="legend-scale">
+        <span>Very poor</span><span>Fair</span><span>Good</span>
+      </div>
+
+      <div class="legend-title legend-gap">Defect Signals</div>
+      <div class="defect-gradient-bar"></div>
+      <div class="legend-scale">
+        <span>Moderate</span><span>Severe</span>
+      </div>
+      <div class="legend-note">More solid = higher confidence</div>
+
+      <div class="panel-section-title panel-gap">What am I looking at?</div>
+
+      <div><b>Road Surface Quality</b><br>
+        100m road sections scored from phone sensor data. Lower scores indicate rougher surface conditions.
+      </div>
+
+      <div class="info-gap"><b>Defect Signals</b><br>
+        Localised impact clusters. Redder signals indicate stronger impacts. More solid signals indicate higher confidence.
+      </div>
+    </div>
+  </div>
 
 
 
 
-// --------------------------------------------------
-// Helpers
-// --------------------------------------------------
-function sqiColor(score) {
-    score = Number(score);
-    if (isNaN(score)) return "#999999";
+  <button id="locate-btn" title="Centre on my location">➤</button>
 
-    // SQI scale: 0 = bad/red, 50 = orange, 100 = good/green
-    let t = Math.max(0, Math.min(1, score / 100));
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    let r1, g1, b1, r2, g2, b2, a;
+  <script>
 
-    if (t < 0.5) {
-        // red -> orange
-        a = t / 0.5;
-        r1 = 200; g1 = 0;   b1 = 0;     // stronger red
-        r2 = 255; g2 = 140; b2 = 0;     // stronger orange
-    } else {
-        // orange -> green
-        a = (t - 0.5) / 0.5;
-        r1 = 255; g1 = 140; b1 = 0;     // orange
-        r2 = 0;   g2 = 160; b2 = 60;    // stronger green
+  function togglePanel(contentId, arrowId) {
+      const content = document.getElementById(contentId);
+      const arrow = document.getElementById(arrowId);
+
+      if (!content || !arrow) return;
+
+      const hidden = content.style.display === "none";
+
+      content.style.display = hidden ? "block" : "none";
+      arrow.textContent = hidden ? "▲" : "▼";
+  }
+
+
+  // --------------------------------------------------
+  // Map init
+  // --------------------------------------------------
+  var map = L.map('map', { preferCanvas: true }).setView([52.254, -0.842], 13);
+
+  L.tileLayer(
+    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors'
     }
+  ).addTo(map);
 
-    let r = Math.round(r1 + (r2 - r1) * a);
-    let g = Math.round(g1 + (g2 - g1) * a);
-    let b = Math.round(b1 + (b2 - b1) * a);
-
-    return `rgb(${r},${g},${b})`;
-}
-
-function defectColor(sev, min, max) {
-    let t = (sev - min) / (max - min);
-    t = Math.max(0, Math.min(1, t));
-
-    let r, g, b;
-
-    if (t < 0.5) {
-        let a = t / 0.5;
-        r = 254 + (252 - 254) * a;
-        g = 224 + (141 - 224) * a;
-        b = 139 + (89 - 139) * a;
-    } else {
-        let a = (t - 0.5) / 0.5;
-        r = 252 + (215 - 252) * a;
-        g = 141 + (48 - 141) * a;
-        b = 89 + (39 - 89) * a;
-    }
-
-    return "rgb(" + Math.round(r) + "," + Math.round(g) + "," + Math.round(b) + ")";
-}
-
-function defectOpacity(conf) {
-    return 0.12 + 0.55 * conf;
-}
-
-function defectRadius(sev, min, max) {
-    return 5;
-}
+  var segmentLayer = L.layerGroup().addTo(map);
+  var defectLayer = L.layerGroup().addTo(map);
 
 
-// --------------------------------------------------
-// SEGMENTS (directional chevrons)
-// --------------------------------------------------
-fetch('segments.geojson')
-.then(r => r.json())
-.then(data => {
-
-    data.features.forEach(f => {
-
-        let p = f.properties;
-        let c = f.geometry.coordinates;
-
-        let marker = L.circleMarker([c[1], c[0]], {
-            radius: 4,
-            color: sqiColor(p.public_score),
-            fillColor: sqiColor(p.public_score),
-            fillOpacity: 0.85,
-            weight: 0,
-            stroke: false
-        }).addTo(segmentLayer);
-    });
-
-});
 
 
-// --------------------------------------------------
-// DEFECTS
-// --------------------------------------------------
-fetch('defects.geojson')
-.then(r => r.json())
-.then(data => {
+  // --------------------------------------------------
+  // Helpers
+  // --------------------------------------------------
+  function sqiColor(score) {
+      score = Number(score);
+      if (isNaN(score)) return "#999999";
 
-    let severities = data.features.map(f => f.properties.severity);
-    let min = Math.min(...severities);
-    let max = Math.max(...severities);
+      // SQI scale: 0 = bad/red, 50 = orange, 100 = good/green
+      let t = Math.max(0, Math.min(1, score / 100));
 
-    data.features.forEach(f => {
+      let r1, g1, b1, r2, g2, b2, a;
 
-        let p = f.properties;
-        let c = f.geometry.coordinates;
+      if (t < 0.5) {
+          // red -> orange
+          a = t / 0.5;
+          r1 = 200; g1 = 0;   b1 = 0;     // stronger red
+          r2 = 255; g2 = 140; b2 = 0;     // stronger orange
+      } else {
+          // orange -> green
+          a = (t - 0.5) / 0.5;
+          r1 = 255; g1 = 140; b1 = 0;     // orange
+          r2 = 0;   g2 = 160; b2 = 60;    // stronger green
+      }
 
-        L.circleMarker([c[1], c[0]], {
-            radius: defectRadius(p.severity, min, max),
-            color: defectColor(p.severity, min, max),
-            fillColor: defectColor(p.severity, min, max),
-            fillOpacity: defectOpacity(p.confidence),
-            weight: 0.5
-        }).addTo(defectLayer);
+      let r = Math.round(r1 + (r2 - r1) * a);
+      let g = Math.round(g1 + (g2 - g1) * a);
+      let b = Math.round(b1 + (b2 - b1) * a);
 
-    });
+      return `rgb(${r},${g},${b})`;
+  }
 
-});
+  function defectColor(sev, min, max) {
+      let t = (sev - min) / (max - min);
+      t = Math.max(0, Math.min(1, t));
 
-document.getElementById("toggle-sqi").addEventListener("change", function () {
-    if (this.checked) {
-        segmentLayer.addTo(map);
-    } else {
-        map.removeLayer(segmentLayer);
-    }
-});
+      let r, g, b;
 
-document.getElementById("toggle-defects").addEventListener("change", function () {
-    if (this.checked) {
-        defectLayer.addTo(map);
-    } else {
-        map.removeLayer(defectLayer);
-    }
-});
+      if (t < 0.5) {
+          let a = t / 0.5;
+          r = 254 + (252 - 254) * a;
+          g = 224 + (141 - 224) * a;
+          b = 139 + (89 - 139) * a;
+      } else {
+          let a = (t - 0.5) / 0.5;
+          r = 252 + (215 - 252) * a;
+          g = 141 + (48 - 141) * a;
+          b = 89 + (39 - 89) * a;
+      }
 
-document.getElementById("locate-btn").addEventListener("click", function () {
-    if (!navigator.geolocation) {
-        alert("Location is not supported by this browser.");
-        return;
-    }
+      return "rgb(" + Math.round(r) + "," + Math.round(g) + "," + Math.round(b) + ")";
+  }
 
-    navigator.geolocation.getCurrentPosition(
-        function (pos) {
-            let lat = pos.coords.latitude;
-            let lon = pos.coords.longitude;
+  function defectOpacity(conf) {
+      return 0.12 + 0.55 * conf;
+  }
 
-            L.circleMarker([lat, lon], {
-                radius: 7,
-                color: "#111",
-                fillColor: "#00a03c",
-                fillOpacity: 0.9,
-                weight: 2
-            }).addTo(map);
+  function defectRadius(sev, min, max) {
+      return 5;
+  }
 
-            map.setView([lat, lon], 16);
-        },
-        function () {
-            alert("Could not get your location.");
-        },
-        {
-            enableHighAccuracy: true,
-            timeout: 10000
-        }
-    );
-});
 
-</script>
+  // --------------------------------------------------
+  // SEGMENTS (directional chevrons)
+  // --------------------------------------------------
+  fetch('segments.geojson')
+  .then(r => r.json())
+  .then(data => {
 
-</body>
-</html>
+      data.features.forEach(f => {
+
+          let p = f.properties;
+          let c = f.geometry.coordinates;
+
+          let marker = L.circleMarker([c[1], c[0]], {
+              radius: 4,
+              color: sqiColor(p.public_score),
+              fillColor: sqiColor(p.public_score),
+              fillOpacity: 0.85,
+              weight: 0,
+              stroke: false
+          }).addTo(segmentLayer);
+      });
+
+  });
+
+
+  // --------------------------------------------------
+  // DEFECTS
+  // --------------------------------------------------
+  fetch('defects.geojson')
+  .then(r => r.json())
+  .then(data => {
+
+      let severities = data.features.map(f => f.properties.severity);
+      let min = Math.min(...severities);
+      let max = Math.max(...severities);
+
+      data.features.forEach(f => {
+
+          let p = f.properties;
+          let c = f.geometry.coordinates;
+
+          L.circleMarker([c[1], c[0]], {
+              radius: defectRadius(p.severity, min, max),
+              color: defectColor(p.severity, min, max),
+              fillColor: defectColor(p.severity, min, max),
+              fillOpacity: defectOpacity(p.confidence),
+              weight: 0.5
+          }).addTo(defectLayer);
+
+      });
+
+  });
+
+  document.getElementById("toggle-sqi").addEventListener("change", function () {
+      if (this.checked) {
+          segmentLayer.addTo(map);
+      } else {
+          map.removeLayer(segmentLayer);
+      }
+  });
+
+  document.getElementById("toggle-defects").addEventListener("change", function () {
+      if (this.checked) {
+          defectLayer.addTo(map);
+      } else {
+          map.removeLayer(defectLayer);
+      }
+  });
+
+  document.getElementById("locate-btn").addEventListener("click", function () {
+      if (!navigator.geolocation) {
+          alert("Location is not supported by this browser.");
+          return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+          function (pos) {
+              let lat = pos.coords.latitude;
+              let lon = pos.coords.longitude;
+
+              L.circleMarker([lat, lon], {
+                  radius: 7,
+                  color: "#111",
+                  fillColor: "#00a03c",
+                  fillOpacity: 0.9,
+                  weight: 2
+              }).addTo(map);
+
+              map.setView([lat, lon], 16);
+          },
+          function () {
+              alert("Could not get your location.");
+          },
+          {
+              enableHighAccuracy: true,
+              timeout: 10000
+          }
+      );
+  });
+
+  </script>
+
+  </body>
+  </html>
+  
