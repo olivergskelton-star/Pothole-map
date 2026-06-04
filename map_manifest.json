@@ -1,6 +1,6 @@
 {
-  "map_build_id": "2026-06-01T12-28-45Z",
-  "built_at_utc": "2026-06-01T12:28:45.021876+00:00",
+  "map_build_id": "2026-06-04T09-44-16Z",
+  "built_at_utc": "2026-06-04T09:44:16.471493+00:00",
   "step3": {
     "noop": false,
     "processed_any": true,
@@ -8,32 +8,32 @@
     "processed_any_burst": true
   },
   "master_counts": {
-    "segments_master_v2_rows": 61270,
+    "segments_master_v2_rows": 63933,
     "events_master_v2_rows": 376,
-    "bursts_master_v1_rows": 62019
+    "bursts_master_v1_rows": 64884
   },
   "source_files": {
     "segments_master_v2": {
       "exists": true,
-      "size_bytes": 11030704,
-      "modified_utc": "2026-06-01T08:24:01+00:00"
+      "size_bytes": 11676643,
+      "modified_utc": "2026-06-04T07:36:32+00:00"
     },
     "events_master_v2": {
       "exists": true,
       "size_bytes": 28473,
-      "modified_utc": "2026-06-01T08:24:55+00:00"
+      "modified_utc": "2026-06-04T07:37:53+00:00"
     },
     "bursts_master_v1": {
       "exists": true,
-      "size_bytes": 5720132,
-      "modified_utc": "2026-06-01T08:26:31+00:00"
+      "size_bytes": 6004426,
+      "modified_utc": "2026-06-04T07:39:25+00:00"
     }
   },
   "webmap_outputs": {
     "segments_geojson": {
       "exists": true,
-      "size_bytes": 21214306,
-      "modified_utc": "2026-06-01T12:28:14+00:00"
+      "size_bytes": 22621479,
+      "modified_utc": "2026-06-04T09:44:11+00:00"
     },
     "events_geojson": {
       "exists": true,
@@ -53,7 +53,7 @@
     "index_html": {
       "exists": true,
       "size_bytes": 12793,
-      "modified_utc": "2026-06-01T12:28:36+00:00"
+      "modified_utc": "2026-06-04T09:44:16+00:00"
     }
   }
 }
