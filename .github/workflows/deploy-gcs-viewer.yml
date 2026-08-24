@@ -1,0 +1,60 @@
+name: Deploy production GCS viewer
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - gcs-viewer/index.html
+      - .github/workflows/deploy-gcs-viewer.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: deploy-production-gcs-viewer
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: pothole-warrior-upload
+          workload_identity_provider: projects/268947036447/locations/global/workloadIdentityPools/github-actions/providers/phw-map-viewer
+          service_account: phw-map-deployer@pothole-warrior-upload.iam.gserviceaccount.com
+
+      - name: Set up Google Cloud CLI
+        uses: google-github-actions/setup-gcloud@v3
+
+      - name: Validate viewer
+        shell: bash
+        run: |
+          grep -Fq 'const VIEWER_VERSION = "v1.3 current-road-health filters";' gcs-viewer/index.html
+          awk '/<script>/{flag=1;next}/<\/script>/{flag=0}flag' gcs-viewer/index.html | node --check
+
+      - name: Deploy viewer
+        shell: bash
+        run: |
+          gcloud storage cp \
+            --cache-control="no-cache,max-age=0,must-revalidate" \
+            --content-type="text/html; charset=utf-8" \
+            gcs-viewer/index.html \
+            gs://pothole-warrior-map-public/index.html
+
+      - name: Verify production object
+        shell: bash
+        run: |
+          deployed_file="$(mktemp)"
+          gcloud storage cp gs://pothole-warrior-map-public/index.html "$deployed_file"
+          cmp gcs-viewer/index.html "$deployed_file"
+          curl -fsSL "https://storage.googleapis.com/pothole-warrior-map-public/index.html?deployment=${GITHUB_SHA}" \
+            | grep -Fq 'v1.3 current-road-health filters'
