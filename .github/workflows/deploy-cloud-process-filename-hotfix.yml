@@ -1,4 +1,4 @@
-name: Deploy processor filename-contract hotfix
+name: Drain processor filename-contract backlog
 
 on:
   push:
@@ -21,13 +21,14 @@ env:
   PROJECT_ID: pothole-warrior-upload
   REGION: europe-west2
   JOB: phw-cloud-process
+  PUBLISH_JOB: phw-cloud-publish
   BASE_IMAGE: gcr.io/pothole-warrior-upload/phw-cloud-process:persist-affected-tiles-20260717t111304z
   HOTFIX_IMAGE: gcr.io/pothole-warrior-upload/phw-cloud-process:filename-contract-hotfix-20260824
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 45
 
     steps:
       - name: Check out repository
@@ -43,13 +44,16 @@ jobs:
       - name: Set up Google Cloud CLI
         uses: google-github-actions/setup-gcloud@v3
 
-      - name: Verify production base image
+      - name: Verify production processor image
         shell: bash
         run: |
           set -euo pipefail
-          current_image="$(gcloud run jobs describe "$JOB"             --project="$PROJECT_ID"             --region="$REGION"             --format='value(spec.template.spec.template.spec.containers[0].image)')"
+          current_image="$(gcloud run jobs describe "$JOB" --project="$PROJECT_ID" --region="$REGION" --format='value(spec.template.spec.template.spec.containers[0].image)')"
           echo "Current image: $current_image"
-          test "$current_image" = "$BASE_IMAGE"
+          if [[ "$current_image" != "$BASE_IMAGE" && "$current_image" != "$HOTFIX_IMAGE" ]]; then
+            echo "Unexpected production image; refusing to continue."
+            exit 1
+          fi
 
       - name: Build and push hotfix image
         shell: bash
@@ -59,33 +63,40 @@ jobs:
           docker build --pull --tag "$HOTFIX_IMAGE" cloud-process-hotfix
           docker push "$HOTFIX_IMAGE"
 
-      - name: Update production processor job
+      - name: Ensure hotfix image is deployed
         shell: bash
         run: |
           set -euo pipefail
-          gcloud run jobs update "$JOB"             --project="$PROJECT_ID"             --region="$REGION"             --image="$HOTFIX_IMAGE"
+          gcloud run jobs update "$JOB" --project="$PROJECT_ID" --region="$REGION" --image="$HOTFIX_IMAGE"
 
-      - name: Execute one controlled processor run
+      - name: Drain remaining processor backlog
         shell: bash
         run: |
           set -euo pipefail
-          if ! gcloud run jobs execute "$JOB"             --project="$PROJECT_ID"             --region="$REGION"             --wait; then
-            echo "Controlled run failed; restoring previous production image."
-            gcloud run jobs update "$JOB"               --project="$PROJECT_ID"               --region="$REGION"               --image="$BASE_IMAGE"
-            exit 1
-          fi
+          for batch in 2 3 4; do
+            echo "Executing recovery batch $batch of 4"
+            gcloud run jobs execute "$JOB" --project="$PROJECT_ID" --region="$REGION" --wait
+          done
 
-      - name: Verify deployed image
+      - name: Verify deployed processor image
         shell: bash
         run: |
           set -euo pipefail
-          deployed_image="$(gcloud run jobs describe "$JOB"             --project="$PROJECT_ID"             --region="$REGION"             --format='value(spec.template.spec.template.spec.containers[0].image)')"
+          deployed_image="$(gcloud run jobs describe "$JOB" --project="$PROJECT_ID" --region="$REGION" --format='value(spec.template.spec.template.spec.containers[0].image)')"
           echo "Deployed image: $deployed_image"
           test "$deployed_image" = "$HOTFIX_IMAGE"
 
-      - name: Capture processor application log
+      - name: Publish refreshed map
         shell: bash
         run: |
           set -euo pipefail
-          gcloud run jobs logs read "$JOB"             --project="$PROJECT_ID"             --region="$REGION"             --freshness=30m             --limit=5000             --order=desc             --log-filter='logName="projects/pothole-warrior-upload/logs/run.googleapis.com%2Fstdout"'             | tee processor-hotfix.log
-          grep -Fq "Normalizing transitional raw filename:" processor-hotfix.log
+          gcloud run jobs execute "$PUBLISH_JOB" --project="$PROJECT_ID" --region="$REGION" --wait
+
+      - name: Capture recovery logs
+        shell: bash
+        run: |
+          set -euo pipefail
+          gcloud run jobs logs read "$JOB" --project="$PROJECT_ID" --region="$REGION" --freshness=1h --limit=10000 --order=desc --log-filter='logName="projects/pothole-warrior-upload/logs/run.googleapis.com%2Fstdout"' > processor-recovery.log
+          gcloud run jobs logs read "$PUBLISH_JOB" --project="$PROJECT_ID" --region="$REGION" --freshness=1h --limit=5000 --order=desc --log-filter='logName="projects/pothole-warrior-upload/logs/run.googleapis.com%2Fstdout"' > publisher-recovery.log
+          tail -n 400 processor-recovery.log
+          tail -n 300 publisher-recovery.log
