@@ -1,13 +1,12 @@
-name: Drain processor filename-contract backlog
+name: Manual processor filename-contract recovery
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - cloud-process-hotfix/**
-      - .github/workflows/deploy-cloud-process-filename-hotfix.yml
   workflow_dispatch:
+    inputs:
+      confirmation:
+        description: Type RECOVER to run three processor batches and publish production
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -27,6 +26,7 @@ env:
 
 jobs:
   deploy:
+    if: ${{ inputs.confirmation == 'RECOVER' }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
 
