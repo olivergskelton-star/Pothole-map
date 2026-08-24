@@ -41,20 +41,51 @@ jobs:
           grep -Fq 'const VIEWER_VERSION = "v1.3 current-road-health filters";' gcs-viewer/index.html
           awk '/<script>/{flag=1;next}/<\/script>/{flag=0}flag' gcs-viewer/index.html | node --check
 
-      - name: Deploy viewer
+      - name: Resolve active release
+        id: release
         shell: bash
         run: |
-          gcloud storage cp \
-            --cache-control="no-cache,max-age=0,must-revalidate" \
-            --content-type="text/html; charset=utf-8" \
-            gcs-viewer/index.html \
-            gs://pothole-warrior-map-public/index.html
+          set -euo pipefail
+          release_prefix="$(python - <<'PY'
+          import re
+          from pathlib import Path
+          text = Path("gcs-viewer/index.html").read_text(encoding="utf-8")
+          match = re.search(
+              r'const TILE_BASE_URL = "https://storage.googleapis.com/pothole-warrior-map-public/(releases/auto-[^/]+/)"',
+              text,
+          )
+          if not match:
+              raise SystemExit("Could not resolve active release from viewer")
+          print(match.group(1).rstrip("/"))
+          PY
+          )"
+          echo "prefix=$release_prefix" >> "$GITHUB_OUTPUT"
+          echo "Active release: $release_prefix"
 
-      - name: Verify production object
+      - name: Deploy viewer to root and active release
         shell: bash
         run: |
-          deployed_file="$(mktemp)"
-          gcloud storage cp gs://pothole-warrior-map-public/index.html "$deployed_file"
-          cmp gcs-viewer/index.html "$deployed_file"
+          set -euo pipefail
+          for destination in \
+            "gs://pothole-warrior-map-public/index.html" \
+            "gs://pothole-warrior-map-public/${{ steps.release.outputs.prefix }}/index.html"; do
+            gcloud storage cp \
+              --cache-control="no-cache,max-age=0,must-revalidate" \
+              --content-type="text/html; charset=utf-8" \
+              gcs-viewer/index.html \
+              "$destination"
+          done
+
+      - name: Verify production objects
+        shell: bash
+        run: |
+          set -euo pipefail
+          for source in \
+            "gs://pothole-warrior-map-public/index.html" \
+            "gs://pothole-warrior-map-public/${{ steps.release.outputs.prefix }}/index.html"; do
+            deployed_file="$(mktemp)"
+            gcloud storage cp "$source" "$deployed_file"
+            cmp gcs-viewer/index.html "$deployed_file"
+          done
           curl -fsSL "https://storage.googleapis.com/pothole-warrior-map-public/index.html?deployment=${GITHUB_SHA}" \
             | grep -Fq 'v1.3 current-road-health filters'
