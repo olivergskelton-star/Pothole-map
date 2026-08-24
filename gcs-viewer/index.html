@@ -1,0 +1,1465 @@
+<!doctype html>
+<html>
+<head>
+  <base href="https://storage.googleapis.com/pothole-warrior-map-public/releases/auto-20260817T121538Z/">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PHW CLEAN PREVIEW — Pot Hole Warrior Road Intelligence Map</title>
+
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+      font-family: Arial, sans-serif;
+    }
+    
+    :root {
+      --phw-dark: rgba(18, 18, 18, 0.88);
+      --phw-dark-soft: rgba(30, 30, 30, 0.82);
+      --phw-yellow: #E2AF04;
+      --phw-green: #00a03c;
+      --phw-orange: #ff8c00;
+      --phw-red: #c80000;
+      --phw-panel-white: rgba(255,255,255,0.94);
+      --phw-panel-border: rgba(0,0,0,0.12);
+      --phw-shadow: 0 4px 18px rgba(0,0,0,0.24);
+      --phw-radius: 14px;
+      --phw-panel-width: 330px;
+    }
+
+    #map {
+      width: 100%;
+      height: 100%;
+    }
+
+    #map-status-panel {
+      position: fixed;
+      left: 18px;
+      bottom: 18px;
+      z-index: 1000;
+      width: var(--phw-panel-width);
+      max-width: calc(100% - 36px);
+      background: var(--phw-dark);
+      color: #ffffff;
+      font-family: Arial, sans-serif;
+      font-size: 11px;
+      line-height: 1.35;
+      padding: 10px 12px;
+      border-radius: var(--phw-radius);
+      box-shadow: var(--phw-shadow);
+      border: 1px solid rgba(255,255,255,0.08);
+      pointer-events: none;
+      box-sizing: border-box;
+    }
+    
+    #defect-inspect-panel {
+      position: fixed;
+      right: 18px;
+      bottom: 82px;
+      z-index: 1001;
+      display: none;
+      width: 310px;
+      max-width: calc(100% - 36px);
+      background: rgba(255,255,255,0.96);
+      color: #111;
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      line-height: 1.35;
+      padding: 12px 14px;
+      border-radius: 14px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.28);
+    }
+    
+    #defect-inspect-close {
+      position: absolute;
+      right: 8px;
+      top: 6px;
+      border: none;
+      background: transparent;
+      font-size: 20px;
+      line-height: 20px;
+      cursor: pointer;
+      color: #333;
+    }
+    
+    #defect-inspect-content {
+      padding-right: 18px;
+    }
+    
+    .inspect-title {
+      font-weight: 900;
+      font-size: 13px;
+      margin-bottom: 7px;
+    }
+    
+    .inspect-row {
+      margin: 3px 0;
+    }
+    
+    .inspect-label {
+      font-weight: 700;
+    }
+    
+    .inspect-small {
+      margin-top: 8px;
+      color: #555;
+      font-size: 11px;
+      word-break: break-word;
+    }
+    
+    @media (max-width: 768px) {
+      #defect-inspect-panel {
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+        width: auto;
+        max-width: none;
+      }
+    }
+
+    #map-status-panel strong {
+      color: #E2AF04;
+      font-weight: 700;
+    }
+
+    #map-notice {
+      position: fixed;
+      left: 50%;
+      top: 18px;
+      transform: translateX(-50%);
+      z-index: 1000;
+      display: none;
+      background: rgba(20, 20, 20, 0.82);
+      color: white;
+      padding: 9px 13px;
+      border-radius: 999px;
+      font-size: 13px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.30);
+      max-width: calc(100% - 32px);
+      text-align: center;
+    }
+
+    #phw-map-type-toggle {
+      display: flex;
+      gap: 8px;
+      background: rgba(18, 18, 18, 0.76);
+      padding: 7px;
+      border-radius: 999px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.20);
+      border: 1px solid rgba(255,255,255,0.10);
+      margin-top: 12px;
+      margin-bottom: 14px;
+      width: fit-content;
+    }
+    
+    .phw-map-type-btn {
+      border: none;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.10);
+      color: #ffffff;
+      padding: 9px 15px;
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      font-weight: 900;
+      cursor: pointer;
+      min-width: 82px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+    }
+    
+    .phw-map-type-btn.active {
+      background: var(--phw-yellow);
+      color: #111111;
+      box-shadow: 0 2px 7px rgba(0,0,0,0.28);
+    }
+    
+    .phw-map-type-btn:not(.active):hover {
+      background: rgba(255,255,255,0.18);
+    }
+
+    #locate-btn {
+      position: fixed;
+      right: 18px;
+      bottom: 22px;
+      z-index: 1000;
+      width: 44px;
+      height: 44px;
+      background: #111;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      font-size: 22px;
+      font-weight: 900;
+      line-height: 44px;
+      text-align: center;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.30);
+      cursor: pointer;
+      transform: rotate(-45deg);
+    }
+
+    #map-panel {
+      position: fixed;
+      left: 18px;
+      top: 82px;
+      z-index: 1000;
+      width: var(--phw-panel-width);
+      max-width: calc(100% - 36px);
+      background: var(--phw-panel-white);
+      padding: 0;
+      border-radius: var(--phw-radius);
+      box-shadow: var(--phw-shadow);
+      border: 1px solid var(--phw-panel-border);
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      line-height: 1.35;
+      overflow: hidden;
+    }
+
+    .panel-toggle {
+      cursor: pointer;
+      font-weight: 900;
+      user-select: none;
+      background: var(--phw-dark);
+      color: #ffffff;
+      padding: 11px 14px;
+      letter-spacing: 0.1px;
+    }
+
+    .panel-content {
+      padding: 12px 14px 14px 14px;
+    }
+
+    .panel-section-title {
+      font-weight: 900;
+      margin-bottom: 7px;
+    }
+
+    .panel-gap {
+      margin-top: 14px;
+    }
+
+    .layer-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin: 6px 0;
+      cursor: pointer;
+    }
+    
+    .phw-brand-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .phw-brand-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 9px;
+      object-fit: cover;
+      flex: 0 0 auto;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+    }
+    
+    .phw-brand-text {
+      min-width: 0;
+    }
+    
+    .phw-brand-title {
+      font-size: 15px;
+      font-weight: 900;
+      color: var(--phw-yellow);
+      line-height: 1.05;
+    }
+    
+    .phw-brand-subtitle {
+      margin-top: 3px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #ffffff;
+      opacity: 0.92;
+      line-height: 1.2;
+    }
+
+
+
+    .layer-row input {
+      transform: scale(1.05);
+    }
+
+    .legend-title {
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .legend-gap {
+      margin-top: 12px;
+    }
+
+    .gradient-bar {
+      height: 12px;
+      width: 100%;
+      border-radius: 8px;
+      background: linear-gradient(90deg, #00a03c, #ff8c00, #c80000);
+      border: 1px solid rgba(0,0,0,0.25);
+      box-sizing: border-box;
+    }
+    
+    .defect-gradient-bar {
+      height: 12px;
+      width: 100%;
+      border-radius: 8px;
+      background: linear-gradient(90deg, #ff8c00, #c80000);
+      border: 1px solid rgba(0,0,0,0.25);
+      box-sizing: border-box;
+    }
+
+    .legend-scale {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      font-size: 11px;
+      color: #444;
+      margin-top: 4px;
+    }
+
+    .legend-note {
+      margin-top: 7px;
+      color: #555;
+      font-size: 11px;
+    }
+
+    .info-gap {
+      margin-top: 10px;
+    }
+
+    @media (max-width: 950px) {
+      :root {
+        --phw-panel-width: calc(100% - 28px);
+      }
+    
+      #map-panel {
+        left: 14px;
+        right: 14px;
+        top: 72px;
+        width: auto;
+        max-width: none;
+        max-height: calc(100vh - 165px);
+        overflow-y: auto;
+      }
+    
+      .panel-content {
+        display: block;
+        padding: 12px 14px 14px 14px;
+      }
+    
+      .phw-brand-icon {
+        width: 36px;
+        height: 36px;
+      }
+    
+      .phw-brand-title {
+        font-size: 14px;
+      }
+    
+      .phw-brand-subtitle {
+        font-size: 10px;
+      }
+    
+      #phw-map-type-toggle {
+        width: 100%;
+        box-sizing: border-box;
+      }
+    
+      .phw-map-type-btn {
+        flex: 1;
+        min-width: 0;
+        padding: 9px 10px;
+      }
+    
+      #map-status-panel {
+        left: 14px;
+        right: 14px;
+        bottom: 14px;
+        width: auto;
+        max-width: none;
+      }
+    }
+    
+    @media (max-height: 950px) {
+      #map-panel {
+        top: 74px;
+        max-height: calc(100vh - 190px);
+        overflow-y: auto;
+      }
+    
+      .panel-content {
+        padding: 10px 14px 12px 14px;
+      }
+    
+      .panel-section-title {
+        margin-bottom: 5px;
+      }
+    
+      .panel-gap {
+        margin-top: 10px;
+      }
+    
+      .layer-row {
+        margin: 4px 0;
+      }
+    
+      #phw-map-type-toggle {
+        margin-top: 10px;
+        margin-bottom: 10px;
+      }
+    
+      .legend-gap {
+        margin-top: 9px;
+      }
+    
+      .legend-note {
+        margin-top: 5px;
+      }
+    
+      .info-gap {
+        margin-top: 7px;
+      }
+    }
+    
+  </style>
+</head>
+
+<body>
+<div style="
+  position:fixed;
+  left:50%;
+  bottom:14px;
+  transform:translateX(-50%);
+  z-index:99999;
+  background:rgba(20,20,20,.90);
+  color:white;
+  padding:8px 14px;
+  border-radius:18px;
+  font:600 12px Arial,sans-serif;
+  pointer-events:none;
+  box-shadow:0 2px 8px rgba(0,0,0,.35);
+">
+  POTHOLE WARRIOR · LIVE ROAD INTELLIGENCE · 10 m DEFECTS
+</div>
+
+  <div id="map"></div>
+
+  <div id="map-notice"></div>
+  
+  <div id="defect-inspect-panel">
+      <button id="defect-inspect-close" title="Close">×</button>
+      <div id="defect-inspect-content">
+        Select a defect signal
+      </div>
+    </div>
+
+    
+  <div id="map-status-panel">
+    Map status loading...
+  </div>
+
+    <div id="map-panel">
+      <div class="panel-toggle phw-brand-header" onclick="togglePanel('map-panel-content', 'map-panel-arrow')">
+        <img
+          src="https://storage.googleapis.com/pothole-warrior-map-public/assets/phw-icon.png"
+          class="phw-brand-icon"
+          alt="PotHole Warrior"
+        >
+        <div class="phw-brand-text">
+          <div class="phw-brand-title">PotHole Warrior</div>
+          <div class="phw-brand-subtitle">
+            Road Intelligence Map <span id="map-panel-arrow">▼</span>
+          </div>
+        </div>
+      </div>
+    
+      <div id="map-panel-content" class="panel-content" style="display:none;">
+        <div class="panel-section-title">Layers</div>
+    
+        <label class="layer-row">
+          <input type="checkbox" id="toggle-sqi" checked>
+          <span>Road Surface Quality</span>
+        </label>
+    
+        <label class="layer-row">
+          <input type="checkbox" id="toggle-defects" checked>
+          <span>Defect Signals</span>
+        </label>
+        
+        <div class="panel-section-title panel-gap">Show data from</div>
+    
+        <select id="time-window-select" style="width: 100%; padding: 6px; border-radius: 8px; border: 1px solid #bbb; font-size: 12px;">
+          <option value="all" selected>Current road health</option>
+          <option value="1">Last 1 day</option>
+          <option value="7">Last 7 days</option>
+          <option value="30">Last 30 days</option>
+        </select>
+        <div class="legend-note">Current road health keeps the latest exported evidence visible. Recent views use each signal's last-seen time.</div>
+        
+        <div id="phw-map-type-toggle">
+          <button id="phw-map-roadmap" class="phw-map-type-btn active">Map</button>
+          <button id="phw-map-satellite" class="phw-map-type-btn">Satellite</button>
+        </div>
+        
+        <div class="panel-section-title panel-gap">Legend</div>
+            
+        <div class="legend-title">Road Surface Quality</div>
+        <div class="gradient-bar"></div>
+        <div class="legend-scale">
+          <span>Good</span><span>Fair</span><span>Very poor</span>
+        </div>
+    
+        <div class="legend-title legend-gap">Defect Signals</div>
+        <div class="defect-gradient-bar"></div>
+        <div class="legend-scale">
+          <span>Moderate</span><span>Severe</span>
+        </div>
+        <div class="legend-note">More solid = higher confidence</div>
+    
+        <div class="panel-section-title panel-gap">What am I looking at?</div>
+    
+        <div><b>Road Surface Quality</b><br>
+          Surface Quality derived from PotHole Warrior App data.
+        </div>
+    
+        <div class="info-gap"><b>Defect Signals</b><br>
+          Possible rough spots detected from repeated impact signals. Redder means stronger; more solid means higher confidence!
+        </div>
+      </div>
+    </div>
+
+  <button id="locate-btn" title="Centre on my location">➤</button>
+
+  <script>
+    // --------------------------------------------------
+    // Configuration
+    // --------------------------------------------------
+    const GOOGLE_MAPS_API_KEY = "AIzaSyDpM4K6lrZfAxW-b-ln1bI_M1lefFtfroA";
+
+    const TILE_BASE_URL = "https://storage.googleapis.com/pothole-warrior-map-public/releases/auto-20260817T121538Z/";
+    const MANIFEST_URL = `${TILE_BASE_URL}manifest.json`;
+
+    const TILE_SIZE_DEG = 0.01;
+
+    // Canvas rendering allows looser zoom and tile limits than marker rendering.
+    const MIN_SEGMENT_ZOOM = 9;
+    const MIN_DEFECT_ZOOM = 12;
+    const MAX_VISIBLE_TILES = 2200;
+
+    const SEGMENT_PIXEL_RADIUS = 3.5;
+    const DEFECT_PIXEL_RADIUS = 5;
+
+    let map;
+    let phwCanvasOverlay;
+    let manifest;
+    let availableTiles = new Set();
+
+    let segmentLayerVisible = true;
+    let defectLayerVisible = true;
+    let selectedTimeWindowDays = null;
+    let userLocationMarker = null;
+
+    const VIEWER_VERSION = "v1.3 current-road-health filters";
+
+    const loadedSegmentTiles = new Set();
+    const loadedDefectTiles = new Set();
+    const segmentPointsByTile = new Map();
+    const defectPointsByTile = new Map();
+
+    // --------------------------------------------------
+    // UI helpers
+    // --------------------------------------------------
+    function togglePanel(contentId, arrowId) {
+      const content = document.getElementById(contentId);
+      const arrow = document.getElementById(arrowId);
+
+      if (!content || !arrow) return;
+
+      const hidden = content.style.display === "none";
+      content.style.display = hidden ? "block" : "none";
+      arrow.textContent = hidden ? "▲" : "▼";
+    }
+
+    // PHW_PANEL_DEFAULT_STATE_V2
+    (function initialisePanelState() {
+      const content = document.getElementById("map-panel-content");
+      const arrow = document.getElementById("map-panel-arrow");
+
+      if (!content || !arrow) return;
+
+      const compact = window.matchMedia("(max-width: 950px)").matches;
+
+      content.style.display = compact ? "none" : "block";
+      arrow.textContent = compact ? "▼" : "▲";
+    })();
+
+
+    function setMapNotice(message) {
+      const notice = document.getElementById("map-notice");
+      if (!notice) return;
+
+      if (!message) {
+        notice.style.display = "none";
+        notice.textContent = "";
+      } else {
+        notice.textContent = message;
+        notice.style.display = "block";
+      }
+    }
+
+    function setStatusHtml(html) {
+      const panel = document.getElementById("map-status-panel");
+      if (!panel) return;
+
+      const versionLine = `<div><strong>Viewer:</strong> ${VIEWER_VERSION}</div>`;
+
+      if (html.includes("<strong>Viewer:</strong>")) {
+        panel.innerHTML = html;
+      } else {
+        panel.innerHTML = `${html}${versionLine}`;
+      }
+    }
+
+    function fmt(value) {
+      if (typeof value === "number") return value.toLocaleString();
+      if (value === null || value === undefined || value === "") return "unknown";
+      return value;
+    }
+
+    function formatDateTime(value) {
+      if (!value || value === "unknown") return "unknown";
+
+      const d = new Date(value);
+      if (isNaN(d.getTime())) return value;
+
+      return d.toLocaleString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZoneName: "short"
+      });
+    }
+
+    // --------------------------------------------------
+    // Canvas overlay
+    // --------------------------------------------------
+    function createPhwCanvasOverlayClass() {
+      return class PhwCanvasOverlay extends google.maps.OverlayView {
+      constructor() {
+        super();
+        this.canvas = null;
+        this.frameRequested = false;
+      }
+
+      onAdd() {
+        this.canvas = document.createElement("canvas");
+        this.canvas.style.position = "absolute";
+        this.canvas.style.pointerEvents = "none";
+        this.canvas.style.zIndex = "1";
+        this.getPanes().overlayLayer.appendChild(this.canvas);
+      }
+
+      onRemove() {
+        if (this.canvas && this.canvas.parentNode) {
+          this.canvas.parentNode.removeChild(this.canvas);
+        }
+        this.canvas = null;
+      }
+
+      draw() {
+        this.requestRender();
+      }
+
+      requestRender() {
+        if (this.frameRequested) return;
+        this.frameRequested = true;
+        requestAnimationFrame(() => {
+          this.frameRequested = false;
+          this.render();
+        });
+      }
+
+      render() {
+        if (!this.canvas || !map) return;
+
+        const projection = this.getProjection();
+        const bounds = map.getBounds();
+        if (!projection || !bounds) return;
+
+        const ne = bounds.getNorthEast();
+        const sw = bounds.getSouthWest();
+        const topLeft = projection.fromLatLngToDivPixel(new google.maps.LatLng(ne.lat(), sw.lng()));
+        const bottomRight = projection.fromLatLngToDivPixel(new google.maps.LatLng(sw.lat(), ne.lng()));
+
+        const width = Math.max(1, Math.ceil(bottomRight.x - topLeft.x));
+        const height = Math.max(1, Math.ceil(bottomRight.y - topLeft.y));
+        const dpr = window.devicePixelRatio || 1;
+
+        this.canvas.style.left = `${topLeft.x}px`;
+        this.canvas.style.top = `${topLeft.y}px`;
+        this.canvas.style.width = `${width}px`;
+        this.canvas.style.height = `${height}px`;
+
+        const targetWidth = Math.ceil(width * dpr);
+        const targetHeight = Math.ceil(height * dpr);
+        if (this.canvas.width !== targetWidth || this.canvas.height !== targetHeight) {
+          this.canvas.width = targetWidth;
+          this.canvas.height = targetHeight;
+        }
+
+        const ctx = this.canvas.getContext("2d");
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, width, height);
+
+        const zoom = map.getZoom();
+
+        if (zoom >= MIN_SEGMENT_ZOOM && segmentLayerVisible) {
+          this.drawSegmentPoints(ctx, projection, topLeft);
+        }
+
+        if (zoom >= MIN_DEFECT_ZOOM && defectLayerVisible) {
+          this.drawDefectPoints(ctx, projection, topLeft, zoom);
+        }
+      }
+
+      drawSegmentPoints(ctx, projection, topLeft) {
+          ctx.lineCap = "round";
+          ctx.lineJoin = "round";
+        
+          for (const points of segmentPointsByTile.values()) {
+            for (const p of points) {
+              if (!passesTimeWindow(p)) continue;
+              ctx.globalAlpha = 0.78 * freshnessFade(p);
+              
+              
+              const hasLine =
+                Number.isFinite(p.latStart) &&
+                Number.isFinite(p.lngStart) &&
+                Number.isFinite(p.latEnd) &&
+                Number.isFinite(p.lngEnd);
+        
+              if (hasLine) {
+                const startPx = projection.fromLatLngToDivPixel(
+                  new google.maps.LatLng(p.latStart, p.lngStart)
+                );
+                const endPx = projection.fromLatLngToDivPixel(
+                  new google.maps.LatLng(p.latEnd, p.lngEnd)
+                );
+        
+                const x1 = startPx.x - topLeft.x;
+                const y1 = startPx.y - topLeft.y;
+                const x2 = endPx.x - topLeft.x;
+                const y2 = endPx.y - topLeft.y;
+        
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.strokeStyle = sqiColor(p.sqi);
+                ctx.lineWidth = 3.5;
+                ctx.stroke();
+              } else {
+                const px = projection.fromLatLngToDivPixel(
+                  new google.maps.LatLng(p.lat, p.lng)
+                );
+                const x = px.x - topLeft.x;
+                const y = px.y - topLeft.y;
+        
+                ctx.beginPath();
+                ctx.arc(x, y, SEGMENT_PIXEL_RADIUS, 0, Math.PI * 2);
+                ctx.fillStyle = sqiColor(p.sqi);
+                ctx.fill();
+              }
+            }
+          }
+        
+          ctx.globalAlpha = 1;
+        }
+        
+              drawDefectPoints(ctx, projection, topLeft, zoom) {
+                  for (const p of flattenDefectPoints()) {
+                    if (!passesTimeWindow(p)) continue;
+                    
+                    const px = projection.fromLatLngToDivPixel(new google.maps.LatLng(p.lat, p.lng));
+                    const x = px.x - topLeft.x;
+                    const y = px.y - topLeft.y;
+                
+                    const colour = defectColor(p.severity);
+                    const radius = defectRadius(p.severity, zoom);
+                
+                    ctx.beginPath();
+                    ctx.arc(x, y, radius, 0, Math.PI * 2);
+                    ctx.fillStyle = colour;
+                    ctx.globalAlpha = defectOpacity(p.confidence) * freshnessFade(p);
+                    ctx.fill();
+                
+                    ctx.globalAlpha = Math.max(0.15, 0.9 * freshnessFade(p));
+                    ctx.strokeStyle = colour;
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                  }
+                
+                  ctx.globalAlpha = 1;
+                }
+              };
+            }
+
+    function requestCanvasRender() {
+      if (phwCanvasOverlay) phwCanvasOverlay.requestRender();
+    }
+
+    function handleMapClickForDefects(latLng) {
+      if (!latLng || !map || !defectLayerVisible) {
+        hideDefectInspectPanel();
+        return;
+      }
+    
+      const zoom = map.getZoom();
+      if (zoom < MIN_DEFECT_ZOOM) {
+        hideDefectInspectPanel();
+        return;
+      }
+    
+      const clickedLat = latLng.lat();
+      const clickedLng = latLng.lng();
+    
+      let nearest = null;
+      let nearestDistance = Infinity;
+    
+      for (const p of flattenDefectPoints()) {
+        if (!passesTimeWindow(p)) continue;
+        const distance = distanceMeters(clickedLat, clickedLng, p.lat, p.lng);
+    
+        if (distance < nearestDistance) {
+          nearest = p;
+          nearestDistance = distance;
+        }
+      }
+    
+      const maxClickDistanceMeters = defectClickToleranceMeters(zoom);
+    
+      if (nearest && nearestDistance <= maxClickDistanceMeters) {
+        showDefectInspectPanel(nearest);
+      } else {
+        hideDefectInspectPanel();
+      }
+    }
+    
+    function defectClickToleranceMeters(zoom) {
+      // Wider tolerance at lower zoom because markers cover more ground.
+      if (zoom >= 17) return 18;
+      if (zoom >= 16) return 25;
+      if (zoom >= 15) return 35;
+      if (zoom >= 14) return 50;
+      return 75;
+    }
+    
+    function distanceMeters(lat1, lng1, lat2, lng2) {
+      const R = 6371000;
+      const toRad = Math.PI / 180;
+    
+      const dLat = (lat2 - lat1) * toRad;
+      const dLng = (lng2 - lng1) * toRad;
+    
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * toRad) *
+        Math.cos(lat2 * toRad) *
+        Math.sin(dLng / 2) *
+        Math.sin(dLng / 2);
+    
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    
+      return R * c;
+    }
+    
+    function ageDaysFromLastSeen(p) {
+      if (p.lastSeen) {
+        const lastSeenDate = new Date(p.lastSeen);
+        if (!isNaN(lastSeenDate.getTime())) {
+          const ageMs = Math.max(0, Date.now() - lastSeenDate.getTime());
+          return ageMs / (1000 * 60 * 60 * 24);
+        }
+      }
+    
+      return null;
+    }
+
+    function freshnessFade(p) {
+      const ageDays = ageDaysFromLastSeen(p);
+      if (ageDays === null) return 0.45;
+      if (ageDays <= 7) return 1;
+      if (ageDays <= 30) return 0.78;
+      if (ageDays <= 90) return 0.50;
+      return 0.28;
+    }
+
+    function passesTimeWindow(p) {
+      if (selectedTimeWindowDays === null) return true;
+
+      const ageDays = ageDaysFromLastSeen(p);
+      return ageDays !== null && ageDays <= selectedTimeWindowDays;
+    }
+    
+    function getTimeWindowLabel() {
+      if (selectedTimeWindowDays === null) return "current road health";
+      return `last ${selectedTimeWindowDays} days`;
+    }
+    
+    function flattenDefectPoints() {
+      const all = [];
+      for (const points of defectPointsByTile.values()) {
+        for (const p of points) all.push(p);
+      }
+      return all;
+    }
+
+    // --------------------------------------------------
+    // Map init
+    // --------------------------------------------------
+    async function initMap() {
+      map = new google.maps.Map(document.getElementById("map"), {
+        center: { lat: 52.254, lng: -0.842 },
+        zoom: 13,
+        mapTypeId: "roadmap",
+        streetViewControl: false,
+        fullscreenControl: true,
+        fullscreenControlOptions: {
+          position: google.maps.ControlPosition.RIGHT_TOP
+        },
+        mapTypeControl: false,
+        mapTypeControlOptions: {
+          position: google.maps.ControlPosition.RIGHT_TOP
+        },
+        clickableIcons: false,
+        gestureHandling: "greedy"
+      });
+
+      const PhwCanvasOverlayClass = createPhwCanvasOverlayClass();
+      phwCanvasOverlay = new PhwCanvasOverlayClass();
+      phwCanvasOverlay.setMap(map);
+
+      try {
+        manifest = await fetchJson(MANIFEST_URL);
+
+        if (!manifest || manifest.schema !== "phw_public_map_tiles_v1") {
+          throw new Error("Unexpected or missing PHW manifest schema");
+        }
+
+        availableTiles = new Set(manifest.available_tiles || []);
+        renderMapStatusFromManifest(manifest);
+        updateStatusLine("ready");
+      } catch (error) {
+        console.error(error);
+        setStatusHtml("<div><strong>Map status:</strong> PHW manifest failed to load</div>");
+        setMapNotice("PHW map data could not be loaded.");
+        return;
+      }
+
+        map.addListener("idle", refreshVisibleTiles);
+        map.addListener("bounds_changed", requestCanvasRender);
+        
+        map.addListener("click", function (event) {
+          handleMapClickForDefects(event.latLng);
+        });
+        
+        refreshVisibleTiles();
+    }
+
+    async function fetchJson(url) {
+      const response = await fetch(url, { cache: "no-store" });
+      if (!response.ok) throw new Error(`Fetch failed ${response.status}: ${url}`);
+      return response.json();
+    }
+
+    function renderMapStatusFromManifest(statusManifest) {
+    
+        const dataProcessedAt = formatDateTime(
+          statusManifest.data_processed_utc ||
+          statusManifest.generated_at ||
+          statusManifest.generated_at_utc ||
+          statusManifest.built_at_utc ||
+          "unknown"
+        );
+    
+        const segments = statusManifest.segments?.features_written ?? "unknown";
+        const defects = statusManifest.defects?.features_written ?? "unknown";
+        const tiles = statusManifest.tile_count_written ?? statusManifest.tile_count_total ?? "unknown";
+    
+        setStatusHtml(`
+          <div><strong>Data processed:</strong> ${dataProcessedAt}</div>
+          <div><strong>Segments:</strong> ${fmt(segments)} · <strong>Defects:</strong> ${fmt(defects)}</div>
+          <div><strong>Tiles:</strong> ${fmt(tiles)}</div>
+          <div><strong>View:</strong> loading PHW tiles...</div>
+        `);
+      }
+
+    function updateStatusLine(extraLine) {
+      const current = document.getElementById("map-status-panel")?.innerHTML || "";
+    
+      const base = current
+        .replace(/<div><strong>View:<\/strong>.*?<\/div>/g, "")
+        .replace(/<div><strong>Viewer:<\/strong>.*?<\/div>/g, "")
+        .trim();
+    
+      setStatusHtml(`${base}<div><strong>View:</strong> ${extraLine || "ready"}</div>`);
+    }
+
+    // --------------------------------------------------
+    // Tile helpers
+    // --------------------------------------------------
+    function roundCoord(value) {
+      return Number(value.toFixed(2)).toFixed(2);
+    }
+
+    function getVisibleTileIds() {
+      const bounds = map.getBounds();
+      if (!bounds) return [];
+
+      const ne = bounds.getNorthEast();
+      const sw = bounds.getSouthWest();
+      
+      const tileBuffer = TILE_SIZE_DEG;
+
+      const minLat = Math.floor((sw.lat() - tileBuffer) / TILE_SIZE_DEG) * TILE_SIZE_DEG;
+      const maxLat = Math.floor((ne.lat() + tileBuffer) / TILE_SIZE_DEG) * TILE_SIZE_DEG;
+      const minLng = Math.floor((sw.lng() - tileBuffer) / TILE_SIZE_DEG) * TILE_SIZE_DEG;
+      const maxLng = Math.floor((ne.lng() + tileBuffer) / TILE_SIZE_DEG) * TILE_SIZE_DEG;
+
+      const tileIds = [];
+
+      for (let lat = minLat; lat <= maxLat; lat += TILE_SIZE_DEG) {
+        for (let lng = minLng; lng <= maxLng; lng += TILE_SIZE_DEG) {
+          const tileId = `tile_${roundCoord(lat)}_${roundCoord(lng)}`;
+          if (availableTiles.has(tileId)) tileIds.push(tileId);
+        }
+      }
+
+      return tileIds;
+    }
+
+    function clearSegmentTiles() {
+      loadedSegmentTiles.clear();
+      segmentPointsByTile.clear();
+      requestCanvasRender();
+    }
+
+    function clearDefectTiles() {
+      loadedDefectTiles.clear();
+      defectPointsByTile.clear();
+      requestCanvasRender();
+    }
+
+    function clearAllPhwTiles() {
+      clearSegmentTiles();
+      clearDefectTiles();
+    }
+
+    function pruneOffscreenTiles(visibleTileSet, includeDefects) {
+      for (const tileId of Array.from(loadedSegmentTiles)) {
+        if (!visibleTileSet.has(tileId)) {
+          loadedSegmentTiles.delete(tileId);
+          segmentPointsByTile.delete(tileId);
+        }
+      }
+
+      for (const tileId of Array.from(loadedDefectTiles)) {
+        if (!includeDefects || !visibleTileSet.has(tileId)) {
+          loadedDefectTiles.delete(tileId);
+          defectPointsByTile.delete(tileId);
+        }
+      }
+
+      requestCanvasRender();
+    }
+
+    async function refreshVisibleTiles() {
+      if (!map || !availableTiles.size) return;
+
+      const zoom = map.getZoom();
+
+      if (zoom < MIN_SEGMENT_ZOOM) {
+        clearAllPhwTiles();
+        setMapNotice("Zoom in to load Pot Hole Warrior road intelligence.");
+        updateStatusLine(`zoom ${zoom} · zoom in for data`);
+        return;
+      }
+
+      const visibleTiles = getVisibleTileIds();
+
+      if (visibleTiles.length > MAX_VISIBLE_TILES) {
+        clearAllPhwTiles();
+        setMapNotice(`Zoom in further to load PHW data. Tiles in view: ${visibleTiles.length}`);
+        updateStatusLine(`zoom ${zoom} · ${visibleTiles.length} tiles in view`);
+        return;
+      }
+
+      const includeDefects = zoom >= MIN_DEFECT_ZOOM;
+      const visibleTileSet = new Set(visibleTiles);
+
+      pruneOffscreenTiles(visibleTileSet, includeDefects);
+      setMapNotice(null);
+
+      updateStatusLine(
+        includeDefects
+          ? `zoom ${zoom} · ${visibleTiles.length} road + defect tiles · canvas`
+          : `zoom ${zoom} · ${visibleTiles.length} road tiles · canvas`
+      );
+
+      for (const tileId of visibleTiles) {
+        loadSegmentTile(tileId);
+        if (includeDefects) loadDefectTile(tileId);
+      }
+
+      requestCanvasRender();
+    }
+
+    async function loadSegmentTile(tileId) {
+      if (loadedSegmentTiles.has(tileId)) return;
+      loadedSegmentTiles.add(tileId);
+
+      const url = `${TILE_BASE_URL}tiles/segments/${tileId}.geojson`;
+
+      try {
+        const geojson = await fetchJson(url);
+        segmentPointsByTile.set(tileId, extractSegmentPoints(geojson));
+        requestCanvasRender();
+      } catch (error) {
+        loadedSegmentTiles.delete(tileId);
+        console.warn("Segment tile failed:", tileId, error);
+      }
+    }
+
+    async function loadDefectTile(tileId) {
+      if (loadedDefectTiles.has(tileId)) return;
+      loadedDefectTiles.add(tileId);
+
+      const url = `${TILE_BASE_URL}tiles/defects/${tileId}.geojson`;
+
+      try {
+        const geojson = await fetchJson(url);
+        defectPointsByTile.set(tileId, extractDefectPoints(geojson));
+        requestCanvasRender();
+      } catch (error) {
+        loadedDefectTiles.delete(tileId);
+        // Missing defect tiles are normal. Ignore silently.
+      }
+    }
+
+    function extractSegmentPoints(geojson) {
+      const points = [];
+      if (!geojson || !Array.isArray(geojson.features)) return points;
+    
+      for (const feature of geojson.features) {
+        if (!feature.geometry || feature.geometry.type !== "Point") continue;
+        const c = feature.geometry.coordinates;
+        if (!Array.isArray(c) || c.length < 2) continue;
+        const props = feature.properties || {};
+    
+        points.push({
+          lng: Number(c[0]),
+          lat: Number(c[1]),
+    
+          latStart: getFirstNumeric(props, ["lat_start", "start_lat"], null),
+          lngStart: getFirstNumeric(props, ["lon_start", "lng_start", "start_lon", "start_lng"], null),
+          latEnd: getFirstNumeric(props, ["lat_end", "end_lat"], null),
+          lngEnd: getFirstNumeric(props, ["lon_end", "lng_end", "end_lon", "end_lng"], null),
+    
+          sqi: getFirstNumeric(props, ["public_score", "SQI_final", "SQI", "sqi", "SQI_pred_v2"], null),
+
+          freshnessDays: getFirstNumeric(props, ["freshness_days", "age_days"], null),
+          lastSeen: getFirstString(props, ["last_seen_utc", "last_seen", "obs_ts_utc"], null)
+
+        });
+      }
+    
+      return points;
+    }
+
+    function extractDefectPoints(geojson) {
+      const points = [];
+      if (!geojson || !Array.isArray(geojson.features)) return points;
+    
+      for (const feature of geojson.features) {
+        if (!feature.geometry || feature.geometry.type !== "Point") continue;
+        const c = feature.geometry.coordinates;
+        if (!Array.isArray(c) || c.length < 2) continue;
+    
+        const props = feature.properties || {};
+    
+        points.push({
+          lng: Number(c[0]),
+          lat: Number(c[1]),
+    
+          severity: getFirstNumeric(props, ["severity", "sev", "p_bad", "p_bad_v2", "confidence", "conf"], 1),
+          confidence: getFirstNumeric(props, ["confidence", "conf", "confidence_score"], 0.6),
+    
+          burstCount: getFirstNumeric(props, ["burst_count", "bursts", "burst_n", "n_bursts", "count"], null),
+          driveCount: getFirstNumeric(props, ["drive_count", "distinct_drives", "n_drives"], null),
+          dayCount: getFirstNumeric(props, ["distinct_days", "day_count", "n_days"], null),
+          freshnessDays: getFirstNumeric(props, ["freshness_days", "age_days"], null),
+    
+          firstSeen: getFirstString(props, ["first_seen_utc", "first_seen", "first_obs_utc"], null),
+          lastSeen: getFirstString(props, ["last_seen_utc", "last_seen", "last_obs_utc", "obs_ts_utc"], null),
+    
+          driveId: getFirstString(props, ["drive_id", "source_drive", "source_drive_id"], null),
+          sourceFile: getFirstString(props, ["source_filename", "filename"], null),
+    
+          rawProps: props
+        });
+      }
+    
+      return points;
+    }
+
+
+    function getFirstNumeric(props, names, fallback) {
+      for (const name of names) {
+        const value = props[name];
+        if (value !== null && value !== undefined && !isNaN(Number(value))) {
+          return Number(value);
+        }
+      }
+      return fallback;
+    }
+    
+    function getFirstString(props, names, fallback) {
+      for (const name of names) {
+        const value = props[name];
+        if (value !== null && value !== undefined && String(value).trim() !== "") {
+          return String(value);
+        }
+      }
+      return fallback;
+    }
+    
+    function fmtNumber(value, digits = 2) {
+      const n = Number(value);
+      if (isNaN(n)) return "unknown";
+      return n.toFixed(digits);
+    }
+    
+    function fmtMaybeDate(value) {
+      if (!value) return "unknown";
+      return formatDateTime(value);
+    }
+    
+    function showDefectInspectPanel(p) {
+      const panel = document.getElementById("defect-inspect-panel");
+      const content = document.getElementById("defect-inspect-content");
+      if (!panel || !content || !p) return;
+    
+      content.innerHTML = `
+        <div class="inspect-title">Defect Signal</div>
+    
+        <div class="inspect-row"><span class="inspect-label">Severity:</span> ${fmtNumber(p.severity)}</div>
+        <div class="inspect-row"><span class="inspect-label">Confidence:</span> ${fmtNumber(p.confidence)}</div>
+        <div class="inspect-row"><span class="inspect-label">Bursts:</span> ${fmt(p.burstCount)}</div>
+        <div class="inspect-row"><span class="inspect-label">Drives:</span> ${fmt(p.driveCount)}</div>
+        <div class="inspect-row"><span class="inspect-label">Days:</span> ${fmt(p.dayCount)}</div>
+        <div class="inspect-row"><span class="inspect-label">Freshness:</span> ${fmtNumber(p.freshnessDays, 1)} days</div>
+        <div class="inspect-row"><span class="inspect-label">Lat/Lng:</span> ${fmtNumber(p.lat, 6)}, ${fmtNumber(p.lng, 6)}</div>
+    
+        <div class="inspect-small">
+          <div><span class="inspect-label">First seen:</span> ${fmtMaybeDate(p.firstSeen)}</div>
+          <div><span class="inspect-label">Last seen:</span> ${fmtMaybeDate(p.lastSeen)}</div>
+        </div>
+    
+      `;
+    
+      panel.style.display = "block";
+    }
+    
+    function hideDefectInspectPanel() {
+      const panel = document.getElementById("defect-inspect-panel");
+      if (panel) panel.style.display = "none";
+    }
+
+    // --------------------------------------------------
+    // Styling helpers
+    // --------------------------------------------------
+    function sqiColor(score) {
+      score = Number(score);
+      if (isNaN(score)) return "#999999";
+
+      const t = Math.max(0, Math.min(1, score / 100));
+      let r1, g1, b1, r2, g2, b2, a;
+
+      if (t < 0.5) {
+        a = t / 0.5;
+        r1 = 200; g1 = 0;   b1 = 0;
+        r2 = 255; g2 = 140; b2 = 0;
+      } else {
+        a = (t - 0.5) / 0.5;
+        r1 = 255; g1 = 140; b1 = 0;
+        r2 = 0;   g2 = 160; b2 = 60;
+      }
+
+      const r = Math.round(r1 + (r2 - r1) * a);
+      const g = Math.round(g1 + (g2 - g1) * a);
+      const b = Math.round(b1 + (b2 - b1) * a);
+
+      return `rgb(${r},${g},${b})`;
+    }
+
+    function defectRadius(severity, zoom) {
+      let sev = Number(severity);
+      if (isNaN(sev)) sev = 0.6;
+      if (sev > 1) sev = sev / 100;
+      sev = Math.max(0, Math.min(1, sev));
+    
+      const zoomFactor = Math.max(0, Math.min(1, (zoom - 12) / 6));
+      const baseRadius = 2.5 + zoomFactor * 3.5;
+      const severityBoost = sev * 2.5;
+    
+      return baseRadius + severityBoost;
+    }
+
+    function defectColor(severity) {
+      let t = Number(severity);
+      if (isNaN(t)) t = 0.6;
+      if (t > 1) t = t / 100;
+      t = Math.max(0, Math.min(1, t));
+
+      let r, g, b;
+      if (t < 0.5) {
+        const a = t / 0.5;
+        r = 254 + (252 - 254) * a;
+        g = 224 + (141 - 224) * a;
+        b = 139 + (89 - 139) * a;
+      } else {
+        const a = (t - 0.5) / 0.5;
+        r = 252 + (215 - 252) * a;
+        g = 141 + (48 - 141) * a;
+        b = 89 + (39 - 89) * a;
+      }
+
+      return `rgb(${Math.round(r)},${Math.round(g)},${Math.round(b)})`;
+    }
+
+    function defectOpacity(confidence) {
+      let conf = Number(confidence);
+      if (isNaN(conf)) conf = 0.6;
+      conf = Math.max(0, Math.min(1, conf));
+      return 0.12 + 0.55 * conf;
+    }
+
+    // --------------------------------------------------
+    // Layer toggles / locate button
+    // --------------------------------------------------
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("toggle-sqi").addEventListener("change", function () {
+        segmentLayerVisible = this.checked;
+        requestCanvasRender();
+      });
+      
+    const timeWindowSelect = document.getElementById("time-window-select");
+    
+    if (timeWindowSelect) {
+      timeWindowSelect.value = "all";
+    
+      timeWindowSelect.addEventListener("change", function () {
+        if (this.value === "all") {
+          selectedTimeWindowDays = null;
+        } else {
+          selectedTimeWindowDays = Number(this.value);
+        }
+    
+        hideDefectInspectPanel();
+        updateStatusLine(`time window: ${getTimeWindowLabel()} · redraw`);
+        requestCanvasRender();
+      });
+    }
+
+      document.getElementById("toggle-defects").addEventListener("change", function () {
+        defectLayerVisible = this.checked;
+        requestCanvasRender();
+      });
+      
+      document.getElementById("defect-inspect-close").addEventListener("click", hideDefectInspectPanel);
+      
+      const roadmapBtn = document.getElementById("phw-map-roadmap");
+      const satelliteBtn = document.getElementById("phw-map-satellite");
+      
+      if (roadmapBtn && satelliteBtn) {
+        roadmapBtn.addEventListener("click", function () {
+          if (!map) return;
+      
+          map.setMapTypeId("roadmap");
+      
+          roadmapBtn.classList.add("active");
+          satelliteBtn.classList.remove("active");
+        });
+      
+        satelliteBtn.addEventListener("click", function () {
+          if (!map) return;
+      
+          map.setMapTypeId("satellite");
+      
+          satelliteBtn.classList.add("active");
+          roadmapBtn.classList.remove("active");
+        });
+      }
+
+      document.getElementById("locate-btn").addEventListener("click", function () {
+        if (!navigator.geolocation) {
+          alert("Location is not supported by this browser.");
+          return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+          function (pos) {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+
+            if (userLocationMarker) {
+              userLocationMarker.setMap(null);
+            }
+
+            userLocationMarker = new google.maps.Marker({
+              position: { lat, lng },
+              map,
+              icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 7,
+                fillColor: "#00a03c",
+                fillOpacity: 0.9,
+                strokeColor: "#111",
+                strokeWeight: 2
+              },
+              title: "Your location"
+            });
+
+            map.setCenter({ lat, lng });
+            map.setZoom(16);
+          },
+          function () {
+            alert("Could not get your location.");
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 10000
+          }
+        );
+      });
+    });
+
+    function loadGoogleMapsScript() {
+      const script = document.createElement("script");
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&callback=initMap`;
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+    }
+
+    window.initMap = initMap;
+    loadGoogleMapsScript();
+  </script>
+</body>
+</html>
