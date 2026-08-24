@@ -51,11 +51,13 @@ jobs:
           echo "Current image: $current_image"
           test "$current_image" = "$BASE_IMAGE"
 
-      - name: Build hotfix image
+      - name: Build and push hotfix image
         shell: bash
         run: |
           set -euo pipefail
-          gcloud builds submit cloud-process-hotfix             --project="$PROJECT_ID"             --tag="$HOTFIX_IMAGE"
+          gcloud auth configure-docker gcr.io --quiet
+          docker build --pull --tag "$HOTFIX_IMAGE" cloud-process-hotfix
+          docker push "$HOTFIX_IMAGE"
 
       - name: Update production processor job
         shell: bash
